@@ -2,6 +2,12 @@
 
 Static browser-based editors for printable objects. The first editor creates a coin-cell box from battery types and quantities.
 
+Public site: https://hcpark0121.github.io/stl-studio/
+
+Printed design and downloads: https://hcpark0121.github.io/stl-studio/coin-cell-box/tested.html
+
+Custom editor: https://hcpark0121.github.io/stl-studio/coin-cell-box/
+
 ## Coin-cell box
 
 - CR1632, CR2016, CR2025, CR2032 and CR2450; independent quantities.
@@ -24,17 +30,17 @@ Each editor lives in its own directory. `shared/` holds common UI and export hel
 
 ## Publishing
 
-Create a public `stl-studio` repository and push this directory as a **new repository**, not the parent modeling workspace. Set GitHub Pages to GitHub Actions. `.github/workflows/pages.yml` tests and publishes on pushes to main. Use relative URLs so project-site subpaths work.
+The public repository is https://github.com/hcpark0121/stl-studio. Publish only this curated directory to that separate repository; never push the parent modeling workspace or its history. GitHub Pages uses GitHub Actions. `.github/workflows/pages.yml` tests and publishes on pushes to main. Use relative URLs so project-site subpaths work.
 
 See THIRD_PARTY.md for dependency licenses. Original models and photos are CC BY-NC 4.0; see LICENSE-MODELS.md. This grant does not cover editor software source.
 
 ## Validation status
 
-120 layout cases and 6 mesh/opening scenarios pass, plus lid contact checks for upward cell motion. Browser UI interaction has not yet been verified in this environment. Remote GitHub repository creation and Pages publication are pending external access; no live public URL is claimed.
+120 layout cases and 6 mesh/opening scenarios pass, plus lid contact checks for upward cell motion. Browser UI interaction has not yet been verified in this environment. GitHub Actions tests and Pages deployment succeeded on 2026-09-23. Browser automation is blocked by administrator policy on the public host, so visual UI/WebGL verification remains incomplete.
 
 ## Physical fixed release (2026-09-23)
 
-`coin-cell-box/tested.html` provides real photos and exact successful body/lid meshes. The complete PLA 3MF was recombined and slicer-verified with two pauses; the individual parts have user-reported successful physical use. Custom editor geometry remains a separate experimental variant. Downloads include a versioned ZIP, print guide and hash manifest. No live GitHub Pages URL is claimed.
+`coin-cell-box/tested.html` provides real photos and exact successful body/lid meshes. The complete PLA 3MF was recombined and slicer-verified with two pauses; the individual parts have user-reported successful physical use. Custom editor geometry remains a separate experimental variant. Downloads include a versioned ZIP, print guide and hash manifest.
 
 ## Languages and 3D interaction
 
