@@ -2,3 +2,5 @@
 [hidden]{display:none!important}
 
 header{gap:16px;flex-wrap:wrap}.language-picker{margin-left:auto;white-space:nowrap}.toolbar label{min-width:170px}.toolbar output{font-variant-numeric:tabular-nums;margin-left:8px}#fixed-viewport{height:520px;border-radius:12px;overflow:hidden;background:#e8ece5}#fixed-viewport canvas{display:block;width:100%;height:100%}@media(max-width:600px){#fixed-viewport{height:350px}.language-picker select{padding:7px}}
+
+.row-setting{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #d6ded5;padding:12px 0}.row-setting button{padding:5px 12px}.row-setting label{display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;font-size:13px}.row-setting input{width:150px}

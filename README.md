@@ -58,3 +58,6 @@ Before enabling downloads, the worker re-reads both binary STLs, restores the pr
 Allowed settings: 15–25° tilt, 9–12mm centre spacing, 28–35% exposure. Shared URLs are normalized to these bounds. Invalid form values disable export until corrected. Every stored STL edge must have two oppositely oriented incident triangles before export is enabled.
 
 Engraving now uses curved DejaVu Sans Bold outlines (3.2mm text height, 0.6mm recess), fitted within each group’s leading strip. Font notices are included in vendor/label-font.
+
+## Manual rows
+Under Order / quantities per row, enable manual layout to reorder battery types with up/down buttons. Enter comma-separated quantities per row (for example 5,5 for 10 cells); the sum must match the type’s total. Blank means a single row. Manual rows are stacked in the chosen order without automatic repacking. The CR2032 two-row example uses counts 6/10/6/6/4 and places CR2032 first. These settings are preserved in shared URLs and print guides.

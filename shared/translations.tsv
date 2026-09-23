@@ -131,3 +131,12 @@ STL에는 정지가 없습니다. 자석 구멍이 열린 마지막 층 다음�
 출력 파일 검사를 통과하지 못했습니다. 설정을 조정해 주세요.	Print-file checks failed. Please adjust your settings.	出力ファイルの検査に失敗しました。設定を調整してください。	打印文件未通过检查，请调整设置。
 허용 범위: 간격 9–12mm · 기울기 15–25° · 노출 28–35%. 실물 확인 기준은 9mm · 20°입니다.	Allowed: spacing 9–12mm · tilt 15–25° · exposure 28–35%. The physical reference used 9mm · 20°.	範囲：間隔9–12mm・傾斜15–25°・露出28–35%。実物確認の基準は9mm・20°です。	允许范围：间距9–12mm · 倾角15–25° · 露出28–35%。实物验证基准为9mm · 20°。
 입력란의 허용 범위 안에서 값을 입력하세요.	Enter a value within the field’s allowed range.	入力欄の許容範囲内の値を入力してください。	请输入字段允许范围内的数值。
+배치 순서 · 줄별 개수	Order · quantities per row	配置順序・各行の個数	排列顺序 · 每行数量
+배치 직접 지정	Set rows manually	配置を指定	手动设置布局
+자동 배치는 빈 공간을 줄입니다. 직접 지정하면 위에서부터 종류 순서대로 한 줄씩 배치합니다.	Automatic layout reduces empty space. Manual layout places each row top to bottom in your chosen type order.	自動配置は空きを減らします。手動では選んだ種類の順に上から一行ずつ配置します。	自动布局减少空隙。手动布局按指定型号顺序从上到下逐行排列。
+예: 총 10개를 두 줄로 나누려면 4,6을 입력하세요. 비워 두면 한 줄에 모두 배치합니다.	For 10 batteries in two rows, enter 4,6. Leave blank to put them all in one row.	合計10個を二行に分けるには4,6と入力します。空欄なら一行に並べます。	例如将10个分为两行，输入4,6。留空则全部放在一行。
+각 줄의 개수 합계를 종류별 총 개수와 맞춰 주세요.	Row quantities must add up to the total for each battery type.	各行の個数の合計を種類別の総数に合わせてください。	各行数量之和必须等于该型号的总数。
+줄별 개수	Quantities per row	各行の個数	每行数量
+위로 이동	Move up	上へ	上移
+아래로 이동	Move down	下へ	下移
+CR2032 두 줄 배치 예시	Example: CR2032 in two rows	例：CR2032を二行に配置	示例：CR2032分为两行

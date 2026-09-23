@@ -18,3 +18,14 @@ const narrow=layout({...DEFAULT,counts:[10,5,5,5,5],width:65});
 assert(narrow.blocks.some(b=>b.type===0&&b.count<10));
 assert.throws(()=>layout({counts:[0,0,0,0,0]}));
 console.log('PASS layouts',checked,'including mixed quantities, splitting, no overlapping groups');
+
+const manual={...DEFAULT,manual:true,counts:[6,10,6,6,4],order:[1,0,2,3,4],rows:['','5,5','','','']};
+const rows=layout(manual);
+assert.deepEqual(rows.blocks.map(b=>b.type),[1,1,0,2,3,4]);
+assert.deepEqual(rows.blocks.map(b=>b.count),[5,5,6,6,6,4]);
+assert(rows.blocks.every((b,i)=>b.x===1.68&&(!i||b.y>=rows.blocks[i-1].y+rows.blocks[i-1].h)));
+assert.equal(rows.cells.length,32);
+assert.deepEqual(layout(JSON.parse(JSON.stringify(manual))).blocks,rows.blocks);
+for(const text of ['4,5','0,10','5,,5','2.5,7.5','-1,11','abc'])assert.throws(()=>layout({...manual,rows:['',text,'','','']}));
+assert.throws(()=>layout({...manual,width:25}));
+console.log('PASS manual order, exact row counts, round-trip and invalid rows');

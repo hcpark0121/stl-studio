@@ -9,7 +9,13 @@ function status(key){statusKey=key;$('#status').textContent=t(key);}
 let design=structuredClone(DEFAULT),L,built=null,revision=0,busy=false,scene,camera,renderer,controls,root,lidPivot;
 try{if(location.hash.startsWith('#d='))design=normalize(JSON.parse(decodeURIComponent(location.hash.slice(3))));}catch{}
 $('#counts').innerHTML=TYPES.map((t,i)=>`<label class="field"><span><span class="swatch" style="background:${colors[i]}"></span>${t.id}<small>Ø${t.d} × ${t.t}mm</small></span><input type="number" min="0" max="30" step="1" id="count-${i}" aria-label="${t.id} ${tQuantity()}"></label>`).join('');
-function sync(){$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
+function renderRows(){
+ $('#manual').checked=design.manual;$('#manual-settings').hidden=!design.manual;
+ $('#row-settings').innerHTML=design.order.map((i,k)=>`<div class="row-setting"><strong>${TYPES[i].id}</strong><div><button class="secondary" data-move="${i}" data-dir="-1" aria-label="${t('위로 이동')} ${TYPES[i].id}" ${k===0?'disabled':''}>↑</button><button class="secondary" data-move="${i}" data-dir="1" aria-label="${t('아래로 이동')} ${TYPES[i].id}" ${k===4?'disabled':''}>↓</button></div><label>${t('줄별 개수')}<input id="rows-${i}" type="text" inputmode="text" placeholder="${design.counts[i]}" aria-label="${TYPES[i].id} ${t('줄별 개수')}"></label></div>`).join('');
+ TYPES.forEach((_,i)=>{$('#rows-'+i).value=design.rows[i];$('#rows-'+i).addEventListener('input',changed);});
+ for(const button of document.querySelectorAll('[data-move]'))button.onclick=()=>{const at=design.order.indexOf(+button.dataset.move),to=at+Number(button.dataset.dir);[design.order[at],design.order[to]]=[design.order[to],design.order[at]];renderRows();changed();};
+}
+function sync(){renderRows();$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
 function invalidate(){revision++;built=null;for(const id of ['body-download','lid-download','guide-download'])$('#'+id).disabled=true;status('설정에 맞춰 3D 형상을 자동으로 만듭니다.');$('#viewport').hidden=false;if(root)root.visible=false;$('#layout').hidden=!$('#show-plan').checked;}
 function showPlan(){
  try{L=layout(design);$('#metrics').innerHTML=`<span><strong>${L.cells.length}</strong>${t("개 수납")}</span><span><strong>${(L.W+6.9).toFixed(1)} × ${(L.D+3.1).toFixed(1)}</strong>${t("전체 가로 × 세로 mm")}</span><span><strong>${L.outerZ.toFixed(1)}</strong>${t("높이 mm")}</span>`;
@@ -20,11 +26,13 @@ function showPlan(){
  history.replaceState(null,'','#d='+encodeURIComponent(JSON.stringify(design)));
  }catch(e){L=null;status(e.message);$('#layout').innerHTML='';$('#metrics').textContent=t('설정을 조정해 주세요.');$('#pauses').innerHTML='';}
 }
-function changed(){if([...document.querySelectorAll('input[type=number]')].some(el=>el.value===''||!el.validity.valid)){invalidate();L=null;status('입력란의 허용 범위 안에서 값을 입력하세요.');return;}design=normalize({labels:$('#labels').checked,counts:TYPES.map((_,i)=>+$('#count-'+i).value),spacing:+$('#spacing').value,tilt:+$('#tilt').value,width:+$('#width').value,exposure:+$('#exposure').value/100});invalidate();showPlan();scheduleGeneration();}
+function changed(){if([...document.querySelectorAll('input[type=number]')].some(el=>el.value===''||!el.validity.valid)){invalidate();L=null;status('입력란의 허용 범위 안에서 값을 입력하세요.');return;}design=normalize({manual:$('#manual').checked,order:design.order,rows:TYPES.map((_,i)=>$('#rows-'+i).value),labels:$('#labels').checked,counts:TYPES.map((_,i)=>+$('#count-'+i).value),spacing:+$('#spacing').value,tilt:+$('#tilt').value,width:+$('#width').value,exposure:+$('#exposure').value/100});invalidate();showPlan();scheduleGeneration();}
 for(const el of document.querySelectorAll('input[type=number]'))el.addEventListener('input',changed);
 $('#labels').addEventListener('change',changed);
+$('#manual').onchange=()=>{$('#manual-settings').hidden=!$('#manual').checked;changed();};
 $('#reset').onclick=()=>{design=structuredClone(DEFAULT);invalidate();sync();showPlan();scheduleGeneration();};
 $('#example').onclick=()=>{design={...design,counts:[10,5,5,5,5]};invalidate();sync();showPlan();scheduleGeneration();};
+$('#two-row-example').onclick=()=>{design={...design,manual:true,counts:[6,10,6,6,4],order:[1,0,2,3,4],rows:['','5,5','','',''],width:0};invalidate();sync();showPlan();scheduleGeneration();};
 $('#share').onclick=async()=>{try{await navigator.clipboard.writeText(location.href);status('현재 설정 링크를 복사했습니다.');}catch{status('주소창의 주소를 복사하면 같은 설정을 공유할 수 있습니다.');}};
 function init3D(){
  if(renderer)return;
@@ -56,5 +64,5 @@ worker.onerror=()=>{busy=false;status('형상 엔진을 불러오지 못했습�
 function download(data,name,type='application/octet-stream'){const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('#body-download').onclick=()=>built&&download(built.body,'coincell-body.stl');$('#lid-download').onclick=()=>built&&download(built.lid,'coincell-lid-print.stl');
 $('#guide-download').onclick=()=>{if(!built)return;const l=built.layout;download(JSON.stringify({design:l.design,units:'mm',hardware:{magnet:'5 x 2mm, 4 pieces',pin:'1.75mm filament'},layer_height:.2,pause_before_z:{lid:l.pauses[0],body:l.pauses[1]},pause_completed_z:{lid:+(l.pauses[0]-.2).toFixed(2),body:+(l.pauses[1]-.2).toFixed(2)},language,note:t('STL에는 정지가 없습니다. 자석 구멍이 열린 마지막 층 다음에 정지를 설정하세요. 이 맞춤 형상의 실물 끼움과 흔들기 유지력은 미검증입니다.')},null,2),`coincell-print-guide-${language}.json`,'application/json');};
-window.addEventListener('languagechange',()=>{showPlan();status(statusKey);TYPES.forEach((cell,i)=>$('#count-'+i).setAttribute('aria-label',t('{type} 개수',{type:cell.id})));});
+window.addEventListener('languagechange',()=>{renderRows();showPlan();status(statusKey);TYPES.forEach((cell,i)=>$('#count-'+i).setAttribute('aria-label',t('{type} 개수',{type:cell.id})));});
 sync();showPlan();applyTranslations();scheduleGeneration();

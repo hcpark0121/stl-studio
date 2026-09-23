@@ -663,5 +663,50 @@ export const messages = {
     "en": "Enter a value within the field’s allowed range.",
     "ja": "入力欄の許容範囲内の値を入力してください。",
     "zh": "请输入字段允许范围内的数值。"
+  },
+  "배치 순서 · 줄별 개수": {
+    "en": "Order · quantities per row",
+    "ja": "配置順序・各行の個数",
+    "zh": "排列顺序 · 每行数量"
+  },
+  "배치 직접 지정": {
+    "en": "Set rows manually",
+    "ja": "配置を指定",
+    "zh": "手动设置布局"
+  },
+  "자동 배치는 빈 공간을 줄입니다. 직접 지정하면 위에서부터 종류 순서대로 한 줄씩 배치합니다.": {
+    "en": "Automatic layout reduces empty space. Manual layout places each row top to bottom in your chosen type order.",
+    "ja": "自動配置は空きを減らします。手動では選んだ種類の順に上から一行ずつ配置します。",
+    "zh": "自动布局减少空隙。手动布局按指定型号顺序从上到下逐行排列。"
+  },
+  "예: 총 10개를 두 줄로 나누려면 4,6을 입력하세요. 비워 두면 한 줄에 모두 배치합니다.": {
+    "en": "For 10 batteries in two rows, enter 4,6. Leave blank to put them all in one row.",
+    "ja": "合計10個を二行に分けるには4,6と入力します。空欄なら一行に並べます。",
+    "zh": "例如将10个分为两行，输入4,6。留空则全部放在一行。"
+  },
+  "각 줄의 개수 합계를 종류별 총 개수와 맞춰 주세요.": {
+    "en": "Row quantities must add up to the total for each battery type.",
+    "ja": "各行の個数の合計を種類別の総数に合わせてください。",
+    "zh": "各行数量之和必须等于该型号的总数。"
+  },
+  "줄별 개수": {
+    "en": "Quantities per row",
+    "ja": "各行の個数",
+    "zh": "每行数量"
+  },
+  "위로 이동": {
+    "en": "Move up",
+    "ja": "上へ",
+    "zh": "上移"
+  },
+  "아래로 이동": {
+    "en": "Move down",
+    "ja": "下へ",
+    "zh": "下移"
+  },
+  "CR2032 두 줄 배치 예시": {
+    "en": "Example: CR2032 in two rows",
+    "ja": "例：CR2032を二行に配置",
+    "zh": "示例：CR2032分为两行"
   }
 };
