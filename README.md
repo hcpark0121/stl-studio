@@ -56,3 +56,5 @@ Battery-type engraving is enabled by default and can be disabled. Each group get
 Before enabling downloads, the worker re-reads both binary STLs, restores the printed lid by a proper rotation, checks assembly interference, connected solid bodies, and retention-pad contact for every cell raised 1mm. Sixteen saved-file scenarios cover mixed counts, split groups, single types, and setting extremes; an intentionally mirrored lid must fail. These checks do not replace physical fit and print trials.
 
 Allowed settings: 15–25° tilt, 9–12mm centre spacing, 28–35% exposure. Shared URLs are normalized to these bounds. Invalid form values disable export until corrected. Every stored STL edge must have two oppositely oriented incident triangles before export is enabled.
+
+Engraving now uses curved DejaVu Sans Bold outlines (3.2mm text height, 0.6mm recess), fitted within each group’s leading strip. Font notices are included in vendor/label-font.

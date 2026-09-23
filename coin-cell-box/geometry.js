@@ -1,5 +1,5 @@
 import {layout,TYPES} from './layout.js';
-import {labelRects} from './labels.js';
+import {labelPolygons} from './labels.js';
 export function build(M,raw) {
  const L=layout(raw),{Manifold:MF,CrossSection:CS}=M,junk=[];
  const j=m=>(junk.push(m),m),cube=(x,y,z,w,d,h)=>j(j(MF.cube([w,d,h])).translate([x,y,z]));
@@ -33,8 +33,10 @@ export function build(M,raw) {
   bodyCuts.push(j(j(prism(pts,t.d+1).rotate([90,0,0])).translate([0,c.y+(t.d+1)/2,0])));
  }
  // Each group's reserved 5mm leading strip stays clear of the slots.
- if(L.design.labels)for(const b of L.blocks)for(const r of labelRects(b,TYPES[b.type].id))
-  bodyCuts.push(cube(r.x,r.y,divTop-.6,r.w,r.h,.62));
+ if(L.design.labels)for(const b of L.blocks){
+  const letters=j(new CS(labelPolygons(b,TYPES[b.type].id),'EvenOdd'));
+  bodyCuts.push(j(j(letters.extrude(.62)).translate([0,0,divTop-.6])));
+ }
  const pocket=(y,z)=>j(cyl(2.65,2.2).translate([magnetX,y,z]));
  for(const y of [D/4,D*3/4])bodyCuts.push(pocket(y,L.bodyCeil-2.2));
  // Recessed fingertip opening; sloped roof, same principle as the physical prototype.

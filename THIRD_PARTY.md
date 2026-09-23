@@ -4,3 +4,5 @@
 - Three.js 0.185.1 and OrbitControls — MIT License. Distribution and license: `vendor/three/`. https://github.com/mrdoob/three.js
 
 Both libraries are vendored so runtime does not depend on a CDN. Preserve their license files when redistributing.
+
+- Coin-cell engraving uses subset outlines derived from DejaVu Sans Bold. Bitstream Vera / Arev license notices: `vendor/label-font/LICENSE.txt`. Only the required glyph outlines are bundled; no system-font dependency at runtime.
