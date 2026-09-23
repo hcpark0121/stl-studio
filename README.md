@@ -60,7 +60,9 @@ Allowed settings: 15–25° tilt, 9–12mm centre spacing, 28–35% exposure. Sh
 Engraving now uses curved DejaVu Sans Bold outlines (3.2mm text height, 0.6mm recess), fitted within each group’s leading strip. Font notices are included in vendor/label-font.
 
 ## Manual rows
-Under Order / quantities per row, enable manual layout to reorder battery types with up/down buttons. Enter comma-separated quantities per row (for example 5,5 for 10 cells); the sum must match the type’s total. Blank means a single row. Manual rows are stacked in the chosen order without automatic repacking. The CR2032 two-row example uses counts 6/10/6/6/4 and places CR2032 first. These settings are preserved in shared URLs and print guides.
+Under Order / quantities per row, enable manual layout to reorder battery types with up/down buttons. Enter comma-separated quantities per row (for example 5,5 for 10 cells); editing row quantities updates the total automatically, and changing the total redistributes evenly across the current number of rows. Blank means a single row. Manual rows are stacked in the chosen order without automatic repacking. The CR2032 two-row example uses counts 6/10/6/6/4 and places CR2032 first. These settings are preserved in shared URLs and print guides.
 
 ## Cache-safe deployment
 `npm run build` creates `_site/` and gives HTML entry scripts, stylesheets, module imports and workers the same content-derived release version. Pages deploys this build so refreshed HTML cannot silently reuse an older editor module. An already-open page still needs a reload to receive changes.
+
+Input errors identify the battery type or width requirement, highlight the offending field and repeat the explanation next to the preview. Local DOM event checks cover total/row synchronization and recovery from invalid width and row text.

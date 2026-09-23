@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {layout,TYPES,DEFAULT} from '../coin-cell-box/layout.js';
+import {layout,TYPES,DEFAULT,parseRows,balanceRows} from '../coin-cell-box/layout.js';
 let checked=0;
 for(let seed=0;seed<120;seed++) {
  const counts=TYPES.map((_,i)=>(seed*(i+3)+i*7)%16);
@@ -29,3 +29,5 @@ assert.deepEqual(layout(JSON.parse(JSON.stringify(manual))).blocks,rows.blocks);
 for(const text of ['4,5','0,10','5,,5','2.5,7.5','-1,11','abc'])assert.throws(()=>layout({...manual,rows:['',text,'','','']}));
 assert.throws(()=>layout({...manual,width:25}));
 console.log('PASS manual order, exact row counts, round-trip and invalid rows');
+
+assert.equal(balanceRows(12,"5,5"),"6,6");assert.equal(balanceRows(11,"5,5"),"6,5");assert.equal(balanceRows(1,"5,5"),"1");assert.equal(balanceRows(0,"5,5"),"");assert.deepEqual(parseRows("4，6"),[4,6]);assert.equal(parseRows("5,"),null);

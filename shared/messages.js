@@ -708,5 +708,30 @@ export const messages = {
     "en": "Example: CR2032 in two rows",
     "ja": "例：CR2032を二行に配置",
     "zh": "示例：CR2032分为两行"
+  },
+  "{type}: 줄별 개수는 5,5처럼 양의 정수를 쉼표로 구분해 주세요.": {
+    "en": "{type}: separate positive row quantities with commas, e.g. 5,5.",
+    "ja": "{type}：各行の個数を5,5のように正の整数で指定してください。",
+    "zh": "{type}：用逗号分隔每行正整数数量，例如5,5。"
+  },
+  "{type}: 줄별 합계 {sum}개와 총 {total}개가 다릅니다. 줄별 개수를 다시 입력하세요.": {
+    "en": "{type}: row sum {sum} differs from total {total}. Re-enter row quantities.",
+    "ja": "{type}：行の合計{sum}個と総数{total}個が異なります。再入力してください。",
+    "zh": "{type}：每行之和{sum}与总数{total}不符，请重新输入。"
+  },
+  "{type} 한 줄에 내부 폭 {needed}mm가 필요합니다. 폭 상한을 늘리거나 0(자동)으로 바꾸세요.": {
+    "en": "{type} needs {needed}mm internal width per row. Increase the limit or set 0 (auto).",
+    "ja": "{type}の一行には内幅{needed}mmが必要です。上限を増やすか0（自動）にしてください。",
+    "zh": "{type}每行需要{needed}mm内宽。请增加宽度上限或设为0（自动）。"
+  },
+  "{field}: {min}–{max} 범위의 값을 입력하세요.": {
+    "en": "{field}: enter a value from {min} to {max}.",
+    "ja": "{field}：{min}–{max}の値を入力してください。",
+    "zh": "{field}：请输入{min}–{max}范围内的值。"
+  },
+  "예: 4,6을 입력하면 총 10개가 됩니다. 총 개수를 바꾸면 줄 수를 유지하며 균등하게 나눕니다. 비워 두면 한 줄입니다.": {
+    "en": "Entering 4,6 sets the total to 10. Changing the total keeps the row count and redistributes evenly. Blank means one row.",
+    "ja": "4,6と入力すると合計10個になります。総数を変更すると行数を保って均等に分けます。空欄は一行です。",
+    "zh": "输入4,6则总数变为10。修改总数时保持行数并均匀分配。留空表示一行。"
   }
 };

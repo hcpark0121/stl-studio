@@ -31,15 +31,25 @@ function pack(design,width) {
   const w=Math.max(...shelves.map(s=>s.used)),d=shelves.at(-1).y+shelves.at(-1).h;
   return {w,d,blocks,score:w*d*(1+.12*Math.abs(Math.log(w/d)))};
 }
+export function parseRows(text){
+ const parts=text.trim().split(/[,，、]/).map(v=>v.trim());
+ return parts.every(v=>/^\d+$/.test(v)&&+v>0&&+v<=30)?parts.map(Number):null;
+}
+export function balanceRows(total,text){
+ const old=parseRows(text);if(!old||!total)return '';
+ const n=Math.min(total,old.length);return Array.from({length:n},(_,i)=>Math.floor(total/n)+(i<total%n?1:0)).join(',');
+}
+function inputError(message,values,field){const e=new Error(message);e.values=values;e.field=field;return e;}
 function manualPack(design){
  const blocks=[];let y=0,w=0;
  for(const i of design.order){
   const total=design.counts[i];if(!total)continue;
-  const text=design.rows[i].trim(),nums=text?text.split(',').map(v=>v.trim()):[String(total)];
-  if(nums.some(v=>!/^\d+$/.test(v)||+v<1||+v>30)||nums.reduce((s,v)=>s+Number(v),0)!==total)throw Error('각 줄의 개수 합계를 종류별 총 개수와 맞춰 주세요.');
+  const text=design.rows[i].trim(),nums=text?parseRows(text):[total];
+  if(!nums)throw inputError('{type}: 줄별 개수는 5,5처럼 양의 정수를 쉼표로 구분해 주세요.',{type:TYPES[i].id},'rows-'+i);
+  if(nums.reduce((s,v)=>s+v,0)!==total)throw inputError('{type}: 줄별 합계 {sum}개와 총 {total}개가 다릅니다. 줄별 개수를 다시 입력하세요.',{type:TYPES[i].id,sum:nums.reduce((s,v)=>s+v,0),total},'rows-'+i);
   const type=TYPES[i],a=rad(design.tilt),end=Math.max(design.spacing-1.26,type.d*Math.sin(a)+(type.t+.6)/Math.cos(a)+.8);
   for(const n of nums){const count=+n,bw=5+end+(count-1)*design.spacing;
-   if(design.width&&bw>design.width)throw Error('지정한 내부 폭으로는 셀을 배치할 수 없습니다.');
+   if(design.width&&bw>design.width)throw inputError('{type} 한 줄에 내부 폭 {needed}mm가 필요합니다. 폭 상한을 늘리거나 0(자동)으로 바꾸세요.',{type:type.id,needed:Math.ceil(bw)},'width');
    blocks.push({type:i,count,x:0,y,w:bw,h:type.d+1,end});w=Math.max(w,bw);y+=type.d+1+1.26;
   }
  }
