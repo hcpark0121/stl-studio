@@ -2,12 +2,12 @@ export const TYPES = [
   {id:'CR2450',d:24.5,t:5}, {id:'CR2032',d:20,t:3.2},
   {id:'CR2025',d:20,t:2.5}, {id:'CR2016',d:20,t:1.6}, {id:'CR1632',d:16,t:3.2}
 ];
-export const DEFAULT = {counts:[7,7,7,7,7], spacing:9, tilt:20, exposure:0.3333333333, width:0, labels:true, manual:false, order:[0,1,2,3,4], rows:['','','','','']};
+export const DEFAULT = {counts:[7,7,7,7,7], spacing:9, tilt:20, exposure:0.3333333333, width:0, labels:true, align:true, spread:false, merge:false, manual:false, order:[0,1,2,3,4], rows:['','','','','']};
 const rad = a=>a*Math.PI/180;
 export function normalize(raw={}) {
   const n=(x,d,a,b)=>Number.isFinite(+x)?Math.min(b,Math.max(a,+x)):d;
   const order=[...new Set([...(Array.isArray(raw.order)?raw.order:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<TYPES.length),0,1,2,3,4])];
-  return {manual:raw.manual===true,order,rows:TYPES.map((_,i)=>typeof raw.rows?.[i]==='string'?raw.rows[i].slice(0,100):''),labels:raw.labels!==false,counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],7,0,30))),spacing:n(raw.spacing,9,9,12),tilt:n(raw.tilt,20,15,25),exposure:n(raw.exposure,1/3,.28,.35),width:n(raw.width,0,0,210)};
+  return {align:raw.align!==false,spread:raw.spread===true,merge:raw.merge===true,manual:raw.manual===true,order,rows:TYPES.map((_,i)=>typeof raw.rows?.[i]==='string'?raw.rows[i].slice(0,100):''),labels:raw.labels!==false,counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],7,0,30))),spacing:n(raw.spacing,9,9,12),tilt:n(raw.tilt,20,15,25),exposure:n(raw.exposure,1/3,.28,.35),width:n(raw.width,0,0,210)};
 }
 function pack(design,width) {
   const a=rad(design.tilt),pitch=design.spacing, shelves=[],blocks=[];
@@ -42,16 +42,34 @@ export function balanceRows(total,text){
 function inputError(message,values,field){const e=new Error(message);e.values=values;e.field=field;return e;}
 function manualPack(design){
  const blocks=[];let y=0,w=0;
+ const angle=rad(design.tilt),delta=t=>(t.d*Math.cos(angle)+t.t*Math.sin(angle))*(.5-design.exposure)*Math.tan(angle);
+ const rawEnd=t=>Math.max(design.spacing-1.26,t.d*Math.sin(angle)+(t.t+.6)/Math.cos(angle)+.8);
+ const alignedEnd=Math.max(...TYPES.filter((_,i)=>design.counts[i]).map(t=>rawEnd(t)+2*Math.abs(delta(t))));
  for(const i of design.order){
   const total=design.counts[i];if(!total)continue;
   const text=design.rows[i].trim(),nums=text?parseRows(text):[total];
   if(!nums)throw inputError('{type}: 줄별 개수는 5,5처럼 양의 정수를 쉼표로 구분해 주세요.',{type:TYPES[i].id},'rows-'+i);
   if(nums.reduce((s,v)=>s+v,0)!==total)throw inputError('{type}: 줄별 합계 {sum}개와 총 {total}개가 다릅니다. 줄별 개수를 다시 입력하세요.',{type:TYPES[i].id,sum:nums.reduce((s,v)=>s+v,0),total},'rows-'+i);
-  const type=TYPES[i],a=rad(design.tilt),end=Math.max(design.spacing-1.26,type.d*Math.sin(a)+(type.t+.6)/Math.cos(a)+.8);
+  const type=TYPES[i],end=design.align?alignedEnd:rawEnd(type);
   for(const n of nums){const count=+n,bw=5+end+(count-1)*design.spacing;
    if(design.width&&bw>design.width)throw inputError('{type} 한 줄에 내부 폭 {needed}mm가 필요합니다. 폭 상한을 늘리거나 0(자동)으로 바꾸세요.',{type:type.id,needed:Math.ceil(bw)},'width');
-   blocks.push({type:i,count,x:0,y,w:bw,h:type.d+1,end});w=Math.max(w,bw);y+=type.d+1+1.26;
+   blocks.push({type:i,count,x:0,y,w:bw,h:type.d+1,end,shiftX:design.align?-delta(type):0,pitch:design.spacing});w=Math.max(w,bw);y+=type.d+1+1.26;
   }
+ }
+ // Join adjacent small groups only when they fit the existing width.
+ const shelves=[];
+ for(const b of blocks){
+  let shelf=shelves.at(-1);
+  if(!design.merge||!shelf||shelf.used+1.26+b.w>w+1e-8){shelf={items:[],used:0,h:0};shelves.push(shelf);}
+  shelf.items.push(b);shelf.used+=b.w+(shelf.items.length>1?1.26:0);shelf.h=Math.max(shelf.h,b.h);
+ }
+ y=0;
+ for(const shelf of shelves){
+  let extra=design.spread?w-shelf.used:0;
+  const gaps=shelf.items.reduce((sum,b)=>sum+b.count-1,0),add=gaps?Math.min(12-design.spacing,extra/gaps):0;
+  let x=0;
+  for(const b of shelf.items){b.pitch=design.spacing+add;b.w+=(b.count-1)*add;b.x=x;b.y=y+(shelf.h-b.h)/2;x+=b.w+1.26;}
+  y+=shelf.h+1.26;
  }
  return {w,d:y-1.26,blocks};
 }
@@ -71,7 +89,7 @@ export function layout(raw) {
   const bodyCeil=Math.floor((side-.4)/.2)*.2;
   // Lid is upside-down on the bed; quantize its cavity floor in print coordinates.
   const lidFloor=Math.floor((outerZ-side-.4-2.2)/.2)*.2;
-  const cells=blocks.flatMap(b=>Array.from({length:b.count},(_,k)=>({type:b.type,x:b.x+5+b.end/2+k*design.spacing,y:b.y+b.h/2,z:b.floor+heights[b.type]/2,top:b.top,floor:b.floor})));
+  const cells=blocks.flatMap(b=>Array.from({length:b.count},(_,k)=>({type:b.type,x:b.x+5+b.end/2+(b.shiftX||0)+k*(b.pitch||design.spacing),y:b.y+b.h/2,z:b.floor+heights[b.type]/2,top:b.top,floor:b.floor})));
   if(W+7>256||D+3.1>256)throw Error('P1S 256mm 베드를 벗어납니다. 수량 또는 내부 폭을 줄이세요.');
   return {design,blocks,cells,W,D,H,divTop,side,zPlate,outerZ,axis:[-2.85,0,outerZ-2.5],magnetX:W-5,bodyCeil,lidFloor,pauses:[+(lidFloor+2.4).toFixed(2),+(bodyCeil+.2).toFixed(2)],area:W*D};
 }

@@ -733,5 +733,25 @@ export const messages = {
     "en": "Entering 4,6 sets the total to 10. Changing the total keeps the row count and redistributes evenly. Blank means one row.",
     "ja": "4,6と入力すると合計10個になります。総数を変更すると行数を保って均等に分けます。空欄は一行です。",
     "zh": "输入4,6则总数变为10。修改总数时保持行数并均匀分配。留空表示一行。"
+  },
+  "슬롯 입구 맞춤": {
+    "en": "Align slot openings",
+    "ja": "スロット入口を揃える",
+    "zh": "对齐槽口"
+  },
+  "남는 폭에 간격 넓히기": {
+    "en": "Spread into unused width",
+    "ja": "余白に間隔を広げる",
+    "zh": "利用空余宽度增大间距"
+  },
+  "짧은 줄끼리 합치기": {
+    "en": "Combine short rows",
+    "ja": "短い行をまとめる",
+    "zh": "合并较短行"
+  },
+  "간격은 최대 12mm까지 넓힙니다. 줄 합치기는 순서가 이웃한 묶음이 기존 폭에 들어갈 때만 적용하며, 각인은 묶음마다 유지합니다.": {
+    "en": "Spacing expands up to 12mm. Adjacent groups share a row only when they fit the existing width; each keeps its own label.",
+    "ja": "間隔は最大12mm。隣り合うグループが既存の幅に収まる場合のみ同じ行にまとめ、各刻印を残します。",
+    "zh": "间距最多增至12mm。相邻组能放入现有宽度时才合并，每组保留各自刻字。"
   }
 };

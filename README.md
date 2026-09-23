@@ -66,3 +66,5 @@ Under Order / quantities per row, enable manual layout to reorder battery types 
 `npm run build` creates `_site/` and gives HTML entry scripts, stylesheets, module imports and workers the same content-derived release version. Pages deploys this build so refreshed HTML cannot silently reuse an older editor module. An already-open page still needs a reload to receive changes.
 
 Input errors identify the battery type or width requirement, highlight the offending field and repeat the explanation next to the preview. Local DOM event checks cover total/row synchronization and recovery from invalid width and row text.
+
+Manual layout also supports slot-opening alignment (enabled by default), spacing expansion into spare row width (maximum 12mm pitch), and combining adjacent short groups without increasing box width. Labels remain per group and retention pads follow the resulting positions. Alignment preserves clearance by enlarging the shared end margin where necessary.

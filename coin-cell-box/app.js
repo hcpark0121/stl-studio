@@ -15,13 +15,13 @@ function renderRows(){
  TYPES.forEach((_,i)=>{$('#rows-'+i).value=design.rows[i];$('#rows-'+i).addEventListener('input',changed);});
  for(const button of document.querySelectorAll('[data-move]'))button.onclick=()=>{const at=design.order.indexOf(+button.dataset.move),to=at+Number(button.dataset.dir);[design.order[at],design.order[to]]=[design.order[to],design.order[at]];renderRows();changed();};
 }
-function sync(){renderRows();$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
+function sync(){renderRows();for(const key of ['align','spread','merge'])$('#'+key).checked=design[key];$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
 function invalidate(){revision++;built=null;for(const id of ['body-download','lid-download','guide-download'])$('#'+id).disabled=true;status('설정에 맞춰 3D 형상을 자동으로 만듭니다.');$('#viewport').hidden=false;if(root)root.visible=false;$('#layout').hidden=!$('#show-plan').checked;}
 function showPlan(){
  try{document.querySelectorAll('[aria-invalid]').forEach(el=>el.removeAttribute('aria-invalid'));L=layout(design);$('#metrics').innerHTML=`<span><strong>${L.cells.length}</strong>${t("개 수납")}</span><span><strong>${(L.W+6.9).toFixed(1)} × ${(L.D+3.1).toFixed(1)}</strong>${t("전체 가로 × 세로 mm")}</span><span><strong>${L.outerZ.toFixed(1)}</strong>${t("높이 mm")}</span>`;
  const svg=$('#layout');svg.setAttribute('viewBox',`-8 -5 ${L.W+16} ${L.D+10}`);
  svg.innerHTML=`<rect x="0" y="0" width="${L.W}" height="${L.D}" rx="2" fill="#edf0e7" stroke="#193b37" stroke-width=".5"/>`+L.blocks.map(b=>`<g><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="1" fill="${colors[b.type]}" fill-opacity=".22" stroke="${colors[b.type]}" stroke-width=".4"/><text x="${b.x+2}" y="${b.y+3}" font-size="2.4" fill="#193b37">${TYPES[b.type].id} · ${b.count}</text></g>`).join('')+L.cells.map(c=>`<rect x="${c.x-TYPES[c.type].t/2}" y="${c.y-TYPES[c.type].d/2}" width="${TYPES[c.type].t}" height="${TYPES[c.type].d}" rx=".5" fill="${colors[c.type]}"/>`).join('');
- $('#section').textContent=t('기울기 {tilt}° · 중심 간격 {spacing}mm · 셀 노출 약 {exposure}% · 뚜껑 받침까지 0.5mm',{tilt:design.tilt,spacing:design.spacing,exposure:(design.exposure*100).toFixed(0)});
+ $('#section').textContent=t('기울기 {tilt}° · 중심 간격 {spacing}mm · 셀 노출 약 {exposure}% · 뚜껑 받침까지 0.5mm',{tilt:design.tilt,spacing:design.spread&&design.manual?`${Math.min(...L.blocks.map(b=>b.pitch)).toFixed(1)}–${Math.max(...L.blocks.map(b=>b.pitch)).toFixed(1)}`:design.spacing,exposure:(design.exposure*100).toFixed(0)});
  $('#pauses').innerHTML=[['뚜껑',L.pauses[0]],['본체',L.pauses[1]]].map(([n,z])=>`<tr><td>${t(n)}</td><td>${(z-.2).toFixed(1)}mm</td><td>${t("{layer}층 ({z}mm) 출력 전",{layer:Math.round(z/.2),z:z.toFixed(1)})}</td></tr>`).join('');
  history.replaceState(null,'','#d='+encodeURIComponent(JSON.stringify(design)));
  }catch(e){L=null;status(e.message,e.values);if(e.field)$('#'+e.field)?.setAttribute('aria-invalid','true');$('#layout').innerHTML='';$('#metrics').textContent=t(e.message,e.values);$('#pauses').innerHTML='';}
@@ -36,11 +36,12 @@ function changed(event){
  }
  const invalid=[...document.querySelectorAll('input[type=number]')].find(el=>el.value===''||!el.validity.valid);
  if(invalid){invalidate();L=null;invalid.setAttribute('aria-invalid','true');const name=invalid.getAttribute('aria-label')||invalid.closest('label')?.firstChild?.textContent?.trim()||invalid.id;const values={field:name,min:invalid.min,max:invalid.max};status('{field}: {min}–{max} 범위의 값을 입력하세요.',values);$('#metrics').textContent=t(statusKey,values);return;}
- design=normalize({manual:$('#manual').checked,order:design.order,rows:TYPES.map((_,i)=>$('#rows-'+i).value),labels:$('#labels').checked,counts:TYPES.map((_,i)=>+$('#count-'+i).value),spacing:+$('#spacing').value,tilt:+$('#tilt').value,width:+$('#width').value,exposure:+$('#exposure').value/100});
+ design=normalize({align:$('#align').checked,spread:$('#spread').checked,merge:$('#merge').checked,manual:$('#manual').checked,order:design.order,rows:TYPES.map((_,i)=>$('#rows-'+i).value),labels:$('#labels').checked,counts:TYPES.map((_,i)=>+$('#count-'+i).value),spacing:+$('#spacing').value,tilt:+$('#tilt').value,width:+$('#width').value,exposure:+$('#exposure').value/100});
  TYPES.forEach((_,i)=>$('#rows-'+i).placeholder=design.counts[i]);invalidate();showPlan();scheduleGeneration();
 }
 for(const el of document.querySelectorAll('input[type=number]'))el.addEventListener('input',changed);
 $('#labels').addEventListener('change',changed);
+for(const key of ['align','spread','merge'])$('#'+key).addEventListener('change',changed);
 $('#manual').onchange=()=>{$('#manual-settings').hidden=!$('#manual').checked;changed();};
 $('#reset').onclick=()=>{design=structuredClone(DEFAULT);invalidate();sync();showPlan();scheduleGeneration();};
 $('#example').onclick=()=>{design={...design,counts:[10,5,5,5,5]};invalidate();sync();showPlan();scheduleGeneration();};

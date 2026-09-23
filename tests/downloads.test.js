@@ -12,7 +12,9 @@ function labelArea(paths){
  return Math.abs(paths.reduce((sum,p)=>sum+p.reduce((a,v,i)=>{const q=p[(i+1)%p.length];return a+v[0]*q[1]-q[0]*v[1];},0)/2,0));
 }
 assert.equal(normalize({tilt:0}).tilt,15);assert.equal(normalize({tilt:90}).tilt,25);assert.equal(normalize({spacing:1}).spacing,9);assert.equal(normalize({spacing:100}).spacing,12);assert.equal(normalize({exposure:1}).exposure,.35);
-const cases=[DEFAULT,{...DEFAULT,manual:true,counts:[6,10,6,6,4],order:[1,0,2,3,4],rows:["","5,5","","",""]},{...DEFAULT,manual:true,order:[4,3,2,1,0],counts:[3,4,2,3,2]},{...DEFAULT,counts:[5,10,7,7,7]}, {...DEFAULT,counts:[10,5,5,5,5],width:60},
+const cases=[DEFAULT,
+ {...DEFAULT,manual:true,counts:[6,12,6,6,6],order:[1,0,2,3,4],rows:['6','6,6','6','6','6']},
+ ...[false,true].flatMap(align=>[false,true].map(spread=>({...DEFAULT,manual:true,align,spread,merge:true,counts:[6,12,2,2,3],order:[1,0,2,3,4],rows:['6','6,6','2','2','3']}))),{...DEFAULT,manual:true,counts:[6,10,6,6,4],order:[1,0,2,3,4],rows:["","5,5","","",""]},{...DEFAULT,manual:true,order:[4,3,2,1,0],counts:[3,4,2,3,2]},{...DEFAULT,counts:[5,10,7,7,7]}, {...DEFAULT,counts:[10,5,5,5,5],width:60},
  ...TYPES.map((_,i)=>({...DEFAULT,counts:TYPES.map((_,j)=>i===j?1:0)})),
  ...[15,25].flatMap(tilt=>[9,12].flatMap(spacing=>[.28,.35].map(exposure=>({...DEFAULT,tilt,spacing,exposure,counts:[2,3,1,2,3]}))))];
 for(const [i,design] of cases.entries()){

@@ -31,3 +31,12 @@ assert.throws(()=>layout({...manual,width:25}));
 console.log('PASS manual order, exact row counts, round-trip and invalid rows');
 
 assert.equal(balanceRows(12,"5,5"),"6,6");assert.equal(balanceRows(11,"5,5"),"6,5");assert.equal(balanceRows(1,"5,5"),"1");assert.equal(balanceRows(0,"5,5"),"");assert.deepEqual(parseRows("4，6"),[4,6]);assert.equal(parseRows("5,"),null);
+const requested={...DEFAULT,manual:true,order:[1,0,2,3,4],counts:[6,12,6,6,6],rows:['6','6,6','6','6','6']};
+const aligned=layout(requested),mouth=c=>c.x+(aligned.divTop-c.z)*Math.tan(aligned.design.tilt*Math.PI/180);
+for(let i=0;i<aligned.cells.length;i+=6){assert(Math.abs(mouth(aligned.cells[i])-mouth(aligned.cells[0]))<1e-7);assert(Math.abs(mouth(aligned.cells[i+5])-mouth(aligned.cells[5]))<1e-7);}
+const short={...requested,counts:[6,12,2,2,3],rows:['6','6,6','2','2','3']};
+const separate=layout(short),joined=layout({...short,merge:true}),filled=layout({...short,merge:true,spread:true});
+assert(joined.D<separate.D);assert.equal(joined.W,separate.W);assert.equal(joined.cells.length,separate.cells.length);
+assert(filled.blocks.some(b=>b.pitch>9));assert(filled.blocks.every(b=>b.pitch<=12));
+for(let i=0;i<filled.blocks.length;i++)for(let j=i+1;j<filled.blocks.length;j++){const a=filled.blocks[i],b=filled.blocks[j];assert(a.x+a.w<=b.x+1e-6||b.x+b.w<=a.x+1e-6||a.y+a.h<=b.y+1e-6||b.y+b.h<=a.y+1e-6);}
+console.log('PASS slot-opening alignment, merging and bounded spacing');
