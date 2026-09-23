@@ -623,5 +623,45 @@ export const messages = {
     "en": "Seat every magnet entirely below the next layer. Watch for magnets lifting when printing resumes.",
     "ja": "磁石は次の層より低く完全に入れてください。再開時に浮き上がらないか確認します。",
     "zh": "将所有磁铁完全放入，低于下一层高度。继续打印时检查磁铁是否翘起。"
+  },
+  "코인셀 종류 각인": {
+    "en": "Engrave battery types",
+    "ja": "電池の種類を刻印",
+    "zh": "雕刻电池型号"
+  },
+  "각 묶음 앞에 종류를 0.6mm 깊이로 새깁니다. 본체 STL에도 포함됩니다.": {
+    "en": "Engraves each group’s type 0.6mm deep. Included in the body STL.",
+    "ja": "各グループの手前に種類を深さ0.6mmで刻印します。本体STLにも含まれます。",
+    "zh": "在每组前方雕刻型号，深度0.6mm。本体STL也包含刻字。"
+  },
+  "설정에 맞춰 3D 형상을 자동으로 만듭니다.": {
+    "en": "Generating the 3D model automatically from your settings.",
+    "ja": "設定に合わせて3D形状を自動生成します。",
+    "zh": "根据设置自动生成3D模型。"
+  },
+  "배치도 함께 보기": {
+    "en": "Show layout alongside 3D",
+    "ja": "配置図も表示",
+    "zh": "同时显示布局图"
+  },
+  "코인셀 표시": {
+    "en": "Show batteries",
+    "ja": "電池を表示",
+    "zh": "显示电池"
+  },
+  "출력 파일 검사를 통과하지 못했습니다. 설정을 조정해 주세요.": {
+    "en": "Print-file checks failed. Please adjust your settings.",
+    "ja": "出力ファイルの検査に失敗しました。設定を調整してください。",
+    "zh": "打印文件未通过检查，请调整设置。"
+  },
+  "허용 범위: 간격 9–12mm · 기울기 15–25° · 노출 28–35%. 실물 확인 기준은 9mm · 20°입니다.": {
+    "en": "Allowed: spacing 9–12mm · tilt 15–25° · exposure 28–35%. The physical reference used 9mm · 20°.",
+    "ja": "範囲：間隔9–12mm・傾斜15–25°・露出28–35%。実物確認の基準は9mm・20°です。",
+    "zh": "允许范围：间距9–12mm · 倾角15–25° · 露出28–35%。实物验证基准为9mm · 20°。"
+  },
+  "입력란의 허용 범위 안에서 값을 입력하세요.": {
+    "en": "Enter a value within the field’s allowed range.",
+    "ja": "入力欄の許容範囲内の値を入力してください。",
+    "zh": "请输入字段允许范围内的数值。"
   }
 };

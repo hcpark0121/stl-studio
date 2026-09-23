@@ -1,4 +1,5 @@
 import {layout,TYPES} from './layout.js';
+import {labelRects} from './labels.js';
 export function build(M,raw) {
  const L=layout(raw),{Manifold:MF,CrossSection:CS}=M,junk=[];
  const j=m=>(junk.push(m),m),cube=(x,y,z,w,d,h)=>j(j(MF.cube([w,d,h])).translate([x,y,z]));
@@ -31,6 +32,9 @@ export function build(M,raw) {
   const pts=[[x(lo)-small,lo],[x(lo)+small,lo],[x(mid)+small,mid],[x(divTop)+large,divTop],[x(top)+large,top],[x(top)-large,top],[x(divTop)-large,divTop],[x(mid)-small,mid]];
   bodyCuts.push(j(j(prism(pts,t.d+1).rotate([90,0,0])).translate([0,c.y+(t.d+1)/2,0])));
  }
+ // Each group's reserved 5mm leading strip stays clear of the slots.
+ if(L.design.labels)for(const b of L.blocks)for(const r of labelRects(b,TYPES[b.type].id))
+  bodyCuts.push(cube(r.x,r.y,divTop-.6,r.w,r.h,.62));
  const pocket=(y,z)=>j(cyl(2.65,2.2).translate([magnetX,y,z]));
  for(const y of [D/4,D*3/4])bodyCuts.push(pocket(y,L.bodyCeil-2.2));
  // Recessed fingertip opening; sloped roof, same principle as the physical prototype.
@@ -41,14 +45,19 @@ export function build(M,raw) {
  const lidBits=[cube(xl,-1.55,zPlate,xr-xl,yl,2),cube(xr-1.2,-1.55,side-4,1.2,yl,outerZ-side+4),knuckles(false)];
  for(const y of [-1.55,D+.35])lidBits.push(cube(xl,y,side-4,xr-xl,1.2,outerZ-side+4));
  for(const y of [D/4,D*3/4])lidBits.push(cube(magnetX-5,y-5.5,side,10,11,outerZ-side));
- for(const b of L.blocks)lidBits.push(cube(b.x+.6,b.y,b.top+.5,b.w-.6,b.h,zPlate-(b.top+.5)+.02));
+ // Leave 0.2mm between pad ends and magnet posts; both join the roof.
+ for(const b of L.blocks)lidBits.push(cube(b.x+.6,b.y,b.top+.5,b.w-.8,b.h,zPlate-(b.top+.5)+.02));
  const lidCuts=[pin(-1)];
  for(const y of [D/4,D*3/4])lidCuts.push(pocket(y,outerZ-L.lidFloor-2.2));
  const lid=cut(uni(lidBits),uni(lidCuts));
  const lidPrint=j(j(lid.rotate([180,0,0])).translate([0,D,outerZ]));
  const coins=uni(L.cells.map(c=>{const t=TYPES[c.type];return j(j(j(MF.cylinder(t.t,t.d/2,t.d/2,64,true)).rotate([0,90+L.design.tilt,0])).translate([c.x,c.y,c.z]));}));
  // Clone outputs; free construction intermediates when using a long-lived worker.
- const result={body:body.asOriginal(),lid:lid.asOriginal(),lidPrint:lidPrint.asOriginal(),coins:coins.asOriginal(),layout:L};
+ const clean=m=>{
+  const mesh=m.getMesh();mesh.tolerance=.0001;mesh.merge();
+  return j(j(new MF(mesh)).asOriginal()).simplify(.0001);
+ };
+ const result={body:clean(body),lid:clean(lid),lidPrint:clean(lidPrint),coins:coins.asOriginal(),layout:L};
  for(const m of new Set(junk))m.delete();
  return result;
 }

@@ -123,3 +123,11 @@ STL에는 정지가 없습니다. 자석 구멍이 열린 마지막 층 다음�
 출력 방향을 유지하고 뚜껑을 거울 반사하지 마세요. 식힌 뒤 필라멘트 핀을 끼우고, 회전을 막지 않도록 끝을 정리하세요.	Keep the supplied print orientations; do not mirror the lid. After cooling, insert the filament pin and trim its ends without obstructing rotation.	付属の印刷方向を維持し、ふたを鏡像反転しないでください。冷却後にフィラメントピンを通し、回転を妨げないよう端を整えます。	保持提供的打印方向，不要镜像盒盖。冷却后穿入耗材轴，并修整两端以免妨碍转动。
 출력 설정: PLA Basic · 노즐 0.4mm · 모든 층 0.2mm · 벽 3 · 채움 20% · 서포트 없음.	Print settings: PLA Basic · 0.4mm nozzle · 0.2mm for all layers · 3 walls · 20% infill · no supports.	印刷設定：PLA Basic · ノズル0.4mm · 全層0.2mm · 壁3周 · インフィル20% · サポートなし。	打印设置：PLA Basic · 0.4mm喷嘴 · 所有层0.2mm · 3道墙 · 20%填充 · 无支撑。
 모든 자석은 다음 층보다 낮게 완전히 넣으세요. 재개할 때 자석이 들뜨지 않는지 확인하세요.	Seat every magnet entirely below the next layer. Watch for magnets lifting when printing resumes.	磁石は次の層より低く完全に入れてください。再開時に浮き上がらないか確認します。	将所有磁铁完全放入，低于下一层高度。继续打印时检查磁铁是否翘起。
+코인셀 종류 각인	Engrave battery types	電池の種類を刻印	雕刻电池型号
+각 묶음 앞에 종류를 0.6mm 깊이로 새깁니다. 본체 STL에도 포함됩니다.	Engraves each group’s type 0.6mm deep. Included in the body STL.	各グループの手前に種類を深さ0.6mmで刻印します。本体STLにも含まれます。	在每组前方雕刻型号，深度0.6mm。本体STL也包含刻字。
+설정에 맞춰 3D 형상을 자동으로 만듭니다.	Generating the 3D model automatically from your settings.	設定に合わせて3D形状を自動生成します。	根据设置自动生成3D模型。
+배치도 함께 보기	Show layout alongside 3D	配置図も表示	同时显示布局图
+코인셀 표시	Show batteries	電池を表示	显示电池
+출력 파일 검사를 통과하지 못했습니다. 설정을 조정해 주세요.	Print-file checks failed. Please adjust your settings.	出力ファイルの検査に失敗しました。設定を調整してください。	打印文件未通过检查，请调整设置。
+허용 범위: 간격 9–12mm · 기울기 15–25° · 노출 28–35%. 실물 확인 기준은 9mm · 20°입니다.	Allowed: spacing 9–12mm · tilt 15–25° · exposure 28–35%. The physical reference used 9mm · 20°.	範囲：間隔9–12mm・傾斜15–25°・露出28–35%。実物確認の基準は9mm・20°です。	允许范围：间距9–12mm · 倾角15–25° · 露出28–35%。实物验证基准为9mm · 20°。
+입력란의 허용 범위 안에서 값을 입력하세요.	Enter a value within the field’s allowed range.	入力欄の許容範囲内の値を入力してください。	请输入字段允许范围内的数值。

@@ -49,3 +49,10 @@ Korean, English, Japanese and Simplified Chinese. URL `?lang=ko|en|ja|zh` takes 
 The editor generates 3D on load and after input changes, debouncing requests and discarding stale worker responses. The fixed-design page loads the actual release meshes automatically. Both expose “Open / close lid”, degrees, Close and Fully open. The preview cells are under assets and are not printable download parts. Four localized fixed print guides and a localized custom-guide note are included.
 
 2026-09-23 browser verification attempt: admin policy blocks the private server host. UI/WebGL interaction was not visually verified; no alternate browser or transport was used to bypass the block. Node layout/geometry/i18n checks and local asset checks pass.
+
+## Engraving and export checks
+Battery-type engraving is enabled by default and can be disabled. Each group gets its own 0.6mm recessed label; the setting is included in shared URLs. Models regenerate automatically. Layout and battery visibility have explicit toggles.
+
+Before enabling downloads, the worker re-reads both binary STLs, restores the printed lid by a proper rotation, checks assembly interference, connected solid bodies, and retention-pad contact for every cell raised 1mm. Sixteen saved-file scenarios cover mixed counts, split groups, single types, and setting extremes; an intentionally mirrored lid must fail. These checks do not replace physical fit and print trials.
+
+Allowed settings: 15–25° tilt, 9–12mm centre spacing, 28–35% exposure. Shared URLs are normalized to these bounds. Invalid form values disable export until corrected. Every stored STL edge must have two oppositely oriented incident triangles before export is enabled.

@@ -2,11 +2,11 @@ export const TYPES = [
   {id:'CR2450',d:24.5,t:5}, {id:'CR2032',d:20,t:3.2},
   {id:'CR2025',d:20,t:2.5}, {id:'CR2016',d:20,t:1.6}, {id:'CR1632',d:16,t:3.2}
 ];
-export const DEFAULT = {counts:[7,7,7,7,7], spacing:9, tilt:20, exposure:0.3333333333, width:0};
+export const DEFAULT = {counts:[7,7,7,7,7], spacing:9, tilt:20, exposure:0.3333333333, width:0, labels:true};
 const rad = a=>a*Math.PI/180;
 export function normalize(raw={}) {
   const n=(x,d,a,b)=>Number.isFinite(+x)?Math.min(b,Math.max(a,+x)):d;
-  return {counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],7,0,30))),spacing:n(raw.spacing,9,8,14),tilt:n(raw.tilt,20,0,30),exposure:n(raw.exposure,1/3,.28,.4),width:n(raw.width,0,0,210)};
+  return {labels:raw.labels!==false,counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],7,0,30))),spacing:n(raw.spacing,9,9,12),tilt:n(raw.tilt,20,15,25),exposure:n(raw.exposure,1/3,.28,.35),width:n(raw.width,0,0,210)};
 }
 function pack(design,width) {
   const a=rad(design.tilt),pitch=design.spacing, shelves=[],blocks=[];
