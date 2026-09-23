@@ -23,11 +23,7 @@ jobs:
           node-version: '22'
       - run: npm test
       - uses: actions/configure-pages@v5
-      - run: |
-          mkdir _site
-          cp index.html THIRD_PARTY.md LICENSE-MODELS.md _site/
-          cp -R coin-cell-box shared vendor _site/
-          touch _site/.nojekyll
+      - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

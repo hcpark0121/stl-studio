@@ -61,3 +61,6 @@ Engraving now uses curved DejaVu Sans Bold outlines (3.2mm text height, 0.6mm re
 
 ## Manual rows
 Under Order / quantities per row, enable manual layout to reorder battery types with up/down buttons. Enter comma-separated quantities per row (for example 5,5 for 10 cells); the sum must match the type’s total. Blank means a single row. Manual rows are stacked in the chosen order without automatic repacking. The CR2032 two-row example uses counts 6/10/6/6/4 and places CR2032 first. These settings are preserved in shared URLs and print guides.
+
+## Cache-safe deployment
+`npm run build` creates `_site/` and gives HTML entry scripts, stylesheets, module imports and workers the same content-derived release version. Pages deploys this build so refreshed HTML cannot silently reuse an older editor module. An already-open page still needs a reload to receive changes.
