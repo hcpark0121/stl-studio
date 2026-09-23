@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "physical_parts": {
+    "body": "retention-v2",
+    "lid": "retention-v3"
+  },
+  "user_feedback": "Usable successful print; photos supplied 2026-09-23",
+  "qualification": "No quantified shake or lifetime test claimed",
+  "license": "CC BY-NC 4.0",
+  "files": {
+    "coincell-tested-full-PLA.3mf": "fdf2b24826a6f7b00dfbeab49acc69825a980ba43672e8fdb7cce77f0f7262a9",
+    "coincell-tested-body.stl": "e09a6a0b02bb66e2ad2b78354ad25d373df4932b44fd082285be282a1b845d2d",
+    "coincell-tested-lid-PLA.3mf": "e4bbd91c12e22bde5facd78a39614e1227c92e4e7ee2db781cf55eeec3f32e25",
+    "coincell-tested-lid.stl": "591ec42a0999a90e844e347124ff34fc5a3ce663c153ed8ed43d0b2be508917b"
+  },
+  "combined_plate_slice": {
+    "exit": 0,
+    "pause_before_z_mm": [
+      11.6,
+      16.8
+    ],
+    "estimated_time": "3h24m54s",
+    "physical_combined_plate_tested": false
+  }
+}

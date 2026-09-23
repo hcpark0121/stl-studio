@@ -1,0 +1,8 @@
+{
+  "name": "stl-studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/layout.test.js && node tests/geometry.test.js && node tests/i18n.test.js"
+  }
+}
