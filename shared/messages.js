@@ -1,4 +1,19 @@
 export const messages = {
+  "위에서 보기": {
+    "en": "Top view",
+    "ja": "真上から見る",
+    "zh": "俯视"
+  },
+  "비스듬히 보기": {
+    "en": "Angled view",
+    "ja": "斜めから見る",
+    "zh": "斜视"
+  },
+  "배치도는 위에서 본 방향입니다. 갈색 띠와 점선 원은 앞쪽 자석 테두리와 매립 자석 자리입니다.": {
+    "en": "The layout is a top view. The brown strip and dashed circles mark the front magnet rim and embedded magnets.",
+    "ja": "配置図は真上から見た向きです。茶色の帯と破線の円は前側の磁石用縁と埋め込み磁石の位置です。",
+    "zh": "布局图为俯视方向。棕色区域和虚线圆表示前侧磁铁边框与内嵌磁铁位置。"
+  },
   "코인셀 보관함": {
     "en": "Coin-cell organizer",
     "ja": "コイン電池ケース",

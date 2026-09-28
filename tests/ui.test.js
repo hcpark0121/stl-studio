@@ -1,6 +1,7 @@
 // Optional DOM interaction test: point STL_STUDIO_JSDOM at an installed jsdom module.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import {PerspectiveCamera,Vector3} from '../vendor/three/three.module.js';
 import {DEFAULT,TYPES,layout,normalize,parseRows,balanceRows,toLanes} from '../coin-cell-box/layout.js';
 const {JSDOM}=await import(process.env.STL_STUDIO_JSDOM||'jsdom');
 const legacy={...DEFAULT,manual:true,merge:true,counts:[3,9,7,7,7],order:[1,0,2,3,4],rows:['3','7,2','7','7','7']};
@@ -9,6 +10,13 @@ Object.assign(w,{DEFAULT,TYPES,layout,normalize,parseRows,balanceRows,toLanes,st
 w.eval(fs.readFileSync(new URL('../coin-cell-box/app.js',import.meta.url),'utf8').replace(/^import .*;$/gm,'').replaceAll('import.meta.url',"'https://example.test/coin-cell-box/app.js'"));
 const $=s=>w.document.querySelector(s),read=()=>JSON.parse(decodeURIComponent(w.location.hash.slice(3))),click=s=>$(s).click(),input=(s,value)=>{const e=$(s);e.value=value;e.dispatchEvent(new w.Event('input',{bubbles:true}));};
 assert.deepEqual(read().lanes,toLanes(legacy));assert($('#count-1').disabled);assert($('#show-plan').checked);
+// Top projection must have the same handedness as the plan, not SVG's default Y-down.
+const L=layout(legacy),sv=$('#layout'),rects=[...sv.querySelectorAll('g rect')];
+L.blocks.forEach((b,i)=>{assert.equal(+rects[i].getAttribute('x'),b.x);assert.equal(+rects[i].getAttribute('y'),L.D-b.y-b.h);});
+const camera=new PerspectiveCamera(40,1,.1,3000);camera.up.set(0,0,1);camera.position.set(L.W/2,L.D/2-.001,Math.max(L.W,L.D)*2);camera.lookAt(L.W/2,L.D/2,0);camera.updateMatrixWorld();
+const base=new Vector3(0,0,0).project(camera),px=new Vector3(1,0,0).project(camera),py=new Vector3(0,1,0).project(camera);
+assert(px.x>base.x);assert(py.y>base.y);assert(sv.querySelectorAll('circle').length===2);
+assert($('#view-top')&&$('#view-angle'));
 input('#lane-count-1-0','4');assert.equal(read().lanes[1][0].count,4);assert.equal(+$('#count-1').value,11);
 click('[data-row="1"][data-group="0"][data-action="group-front"]');assert.equal(read().lanes[1][1].type,1);
 click('[data-row="1"][data-action="row-up"]');assert.equal(read().lanes[0][0].type,0);
