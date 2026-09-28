@@ -13,6 +13,7 @@ function labelArea(paths){
 }
 assert.equal(normalize({tilt:0}).tilt,15);assert.equal(normalize({tilt:90}).tilt,25);assert.equal(normalize({spacing:1}).spacing,9);assert.equal(normalize({spacing:100}).spacing,12);assert.equal(normalize({exposure:1}).exposure,.35);
 const cases=[DEFAULT,
+ ...[15,25].map(tilt=>({...DEFAULT,tilt,manual:true,lanes:[[{type:7,count:3},{type:0,count:2}],[{type:8,count:3},{type:5,count:2}],[{type:6,count:5}]]})),
  ...[false,true].flatMap(align=>[false,true].map(spread=>({...DEFAULT,manual:true,align,spread,lanes:[[{type:1,count:7}],[{type:1,count:2},{type:0,count:3}],[{type:4,count:2},{type:2,count:3},{type:4,count:1}]]}))),
  {...DEFAULT,manual:true,lanes:[[{type:4,count:1},{type:0,count:1},{type:1,count:1},{type:2,count:1},{type:3,count:1}]]},
  {...DEFAULT,manual:true,counts:[6,12,6,6,6],order:[1,0,2,3,4],rows:['6','6,6','6','6','6']},

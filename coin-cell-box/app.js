@@ -3,23 +3,24 @@ import * as THREE from 'three';
 import {OrbitControls} from '../vendor/three/OrbitControls.js';
 import {DEFAULT,TYPES,layout,normalize,parseRows,balanceRows,toLanes} from './layout.js';
 const tQuantity=()=>t('{type} 개수',{type:''}).trim();
-const $=s=>document.querySelector(s),colors=['#ca9a62','#739c8a','#94b5a5','#aac7b0','#c6a4b5'];
+const $=s=>document.querySelector(s),colors=['#ca9a62','#739c8a','#94b5a5','#aac7b0','#c6a4b5','#a4b7ce','#c9ba7c','#b6a0ce','#ccaaa0'];
 let generationTimer,statusValues={},statusKey="설정에 맞춰 3D 형상을 자동으로 만듭니다.";
 function status(key,values={}){statusKey=key;statusValues=values;$('#status').textContent=t(key,values);}
 let design=structuredClone(DEFAULT),L,built=null,revision=0,busy=false,scene,camera,renderer,controls,root,lidPivot;
 try{if(location.hash.startsWith('#d='))design=normalize(JSON.parse(decodeURIComponent(location.hash.slice(3))));}catch{}
 if(design.manual&&!design.lanes){try{design={...design,lanes:toLanes(design)};}catch{}}
-$('#counts').innerHTML=TYPES.map((t,i)=>`<label class="field"><span><span class="swatch" style="background:${colors[i]}"></span>${t.id}<small>Ø${t.d} × ${t.t}mm</small></span><input type="number" min="0" max="30" step="1" id="count-${i}" aria-label="${t.id} ${tQuantity()}"></label>`).join('');
+const countFields=TYPES.map((t,i)=>`<label class="field"><span><span class="swatch" style="background:${colors[i]}"></span>${t.id}<small>Ø${t.d} × ${t.t}mm</small></span><input type="number" min="0" max="30" step="1" id="count-${i}" aria-label="${t.id} ${tQuantity()}"></label>`);
+$('#counts').innerHTML=countFields.slice(0,5).join('');$('#extra-counts').innerHTML=countFields.slice(5).join('');
 function commitLanes(){design=normalize({...design,manual:true,merge:false});sync();invalidate();showPlan();scheduleGeneration();}
 function renderRows(){
  $('#manual').checked=design.manual;$('#manual-settings').hidden=!design.manual;
  TYPES.forEach((_,i)=>$('#count-'+i).disabled=design.manual);
  $('#lane-total').value=design.lanes?.length||1;
  const rows=design.lanes||[];
- $('#row-settings').innerHTML=rows.map((row,r)=>`<section class="lane-card" id="lane-${r}"><div class="toolbar"><strong>${t('{row}줄',{row:r+1})}</strong><button class="secondary" data-row="${r}" data-action="row-up" ${r===0?'disabled':''} aria-label="${t('위로 이동')}">↑</button><button class="secondary" data-row="${r}" data-action="row-down" ${r===rows.length-1?'disabled':''} aria-label="${t('아래로 이동')}">↓</button><button class="secondary" data-row="${r}" data-action="row-delete">${t('줄 삭제')}</button></div><p class="help">${t('뒤 · 힌지 → 앞 · 자석')}</p>${row.map((g,k)=>`<div class="lane-group"><select data-row="${r}" data-group="${k}" aria-label="${t('코인셀 종류')}">${TYPES.map((type,i)=>`<option value="${i}" ${i===g.type?'selected':''}>${type.id}</option>`).join('')}</select><input id="lane-count-${r}-${k}" type="number" min="1" max="30" step="1" value="${g.count}" data-row="${r}" data-group="${k}" aria-label="${t('수량')}"><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-back" ${k===0?'disabled':''} aria-label="${t('뒤로 이동')}">←</button><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-front" ${k===row.length-1?'disabled':''} aria-label="${t('앞으로 이동')}">→</button><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-delete" aria-label="${t('묶음 삭제')}">×</button></div>`).join('')}<button class="secondary" data-row="${r}" data-action="group-add" ${row.length>=8?'disabled':''}>${t('종류·수량 추가')}</button></section>`).join('');
+ $('#row-settings').innerHTML=rows.map((row,r)=>`<section class="lane-card" id="lane-${r}"><div class="toolbar"><strong>${t('{row}줄',{row:r+1})}</strong><button class="secondary" data-row="${r}" data-action="row-up" ${r===0?'disabled':''} aria-label="${t('위로 이동')}">↑</button><button class="secondary" data-row="${r}" data-action="row-down" ${r===rows.length-1?'disabled':''} aria-label="${t('아래로 이동')}">↓</button><button class="secondary" data-row="${r}" data-action="row-delete">${t('줄 삭제')}</button></div><p class="help">${t('뒤 · 힌지 → 앞 · 자석')}</p>${row.map((g,k)=>`<div class="lane-group"><select data-row="${r}" data-group="${k}" aria-label="${t('코인셀 종류')}">${TYPES.map((type,i)=>`${i===0?`<optgroup label="${t('기본 코인셀')}">`:i===5?`</optgroup><optgroup label="${t('기타 코인셀')}">`:''}<option value="${i}" ${i===g.type?'selected':''}>${type.id}</option>`).join('')}</optgroup></select><input id="lane-count-${r}-${k}" type="number" min="1" max="30" step="1" value="${g.count}" data-row="${r}" data-group="${k}" aria-label="${t('수량')}"><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-back" ${k===0?'disabled':''} aria-label="${t('뒤로 이동')}">←</button><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-front" ${k===row.length-1?'disabled':''} aria-label="${t('앞으로 이동')}">→</button><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-delete" aria-label="${t('묶음 삭제')}">×</button></div>`).join('')}<button class="secondary" data-row="${r}" data-action="group-add" ${row.length>=8?'disabled':''}>${t('종류·수량 추가')}</button></section>`).join('');
  $('#add-lane').disabled=rows.length>=12;
 }
-function sync(){renderRows();for(const key of ['align','spread'])$('#'+key).checked=design[key];$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
+function sync(){renderRows();$('#other-cells').open=design.counts.slice(5).some(n=>n>0);for(const key of ['align','spread'])$('#'+key).checked=design[key];$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
 $('#row-settings').onclick=event=>{
  const button=event.target.closest('button[data-action]');if(!button)return;const r=+button.dataset.row,k=+button.dataset.group,rows=design.lanes,row=rows[r];
  switch(button.dataset.action){
@@ -56,7 +57,7 @@ function changed(){
  design=normalize({...design,align:$('#align').checked,spread:$('#spread').checked,manual:$('#manual').checked,labels:$('#labels').checked,counts:TYPES.map((_,i)=>+$('#count-'+i).value),spacing:+$('#spacing').value,tilt:+$('#tilt').value,width:+$('#width').value,exposure:+$('#exposure').value/100});
  invalidate();showPlan();scheduleGeneration();
 }
-for(const el of document.querySelectorAll('#counts input,input#spacing,input#tilt,input#width,input#exposure'))el.addEventListener('input',changed);
+for(const el of document.querySelectorAll('#counts input,#extra-counts input,input#spacing,input#tilt,input#width,input#exposure'))el.addEventListener('input',changed);
 for(const key of ['labels','align','spread'])$('#'+key).addEventListener('change',changed);
 $('#manual').onchange=()=>{
  if($('#manual').checked&&!design.lanes){try{design.lanes=toLanes(design);}catch{design.lanes=[[{type:1,count:1}]];}}

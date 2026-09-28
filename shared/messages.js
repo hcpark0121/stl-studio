@@ -1,4 +1,24 @@
 export const messages = {
+  "기타 코인셀 추가": {
+    "en": "Add other coin cells",
+    "ja": "その他のコイン電池を追加",
+    "zh": "添加其他纽扣电池"
+  },
+  "기본 코인셀": {
+    "en": "Standard coin cells",
+    "ja": "基本のコイン電池",
+    "zh": "常用纽扣电池"
+  },
+  "기타 코인셀": {
+    "en": "Other coin cells",
+    "ja": "その他のコイン電池",
+    "zh": "其他纽扣电池"
+  },
+  "필요한 규격만 수량을 입력하세요. 직접 배치에서는 줄 안의 종류 선택에서 고릅니다.": {
+    "en": "Enter quantities only for the sizes you need. In manual layout, select the type within each row.",
+    "ja": "必要な規格だけ数量を入力してください。直接配置では各列の種類選択から選びます。",
+    "zh": "仅输入所需规格的数量。手动布局时，在各行的类型选项中选择。"
+  },
   "위에서 보기": {
     "en": "Top view",
     "ja": "真上から見る",

@@ -1,13 +1,15 @@
 export const TYPES = [
   {id:'CR2450',d:24.5,t:5}, {id:'CR2032',d:20,t:3.2},
-  {id:'CR2025',d:20,t:2.5}, {id:'CR2016',d:20,t:1.6}, {id:'CR1632',d:16,t:3.2}
+  {id:'CR2025',d:20,t:2.5}, {id:'CR2016',d:20,t:1.6}, {id:'CR1632',d:16,t:3.2},
+  {id:'CR1616',d:16,t:1.6}, {id:'CR1620',d:16,t:2},
+  {id:'CR1216',d:12.5,t:1.6}, {id:'CR1220',d:12.5,t:2}
 ];
-export const DEFAULT = {counts:[7,7,7,7,7], spacing:9, tilt:20, exposure:0.3333333333, width:0, labels:true, align:true, spread:false, merge:false, manual:false, order:[0,1,2,3,4], rows:['','','','',''],lanes:null};
+export const DEFAULT = {counts:[7,7,7,7,7,0,0,0,0], spacing:9, tilt:20, exposure:0.3333333333, width:0, labels:true, align:true, spread:false, merge:false, manual:false, order:TYPES.map((_,i)=>i), rows:TYPES.map(()=>''),lanes:null};
 const rad = a=>a*Math.PI/180;
 export function normalize(raw={}) {
   const n=(x,d,a,b)=>Number.isFinite(+x)?Math.min(b,Math.max(a,+x)):d;
-  const order=[...new Set([...(Array.isArray(raw.order)?raw.order:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<TYPES.length),0,1,2,3,4])];
-  const design={align:raw.align!==false,spread:raw.spread===true,merge:raw.merge===true,manual:raw.manual===true,order,rows:TYPES.map((_,i)=>typeof raw.rows?.[i]==='string'?raw.rows[i].slice(0,100):''),labels:raw.labels!==false,counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],7,0,30))),spacing:n(raw.spacing,9,9,12),tilt:n(raw.tilt,20,15,25),exposure:n(raw.exposure,1/3,.28,.35),width:n(raw.width,0,0,210),lanes:Array.isArray(raw.lanes)?raw.lanes.map(row=>Array.isArray(row)?row.map(g=>({type:Number(g.type),count:Number(g.count)})):[]):null};
+  const order=[...new Set([...(Array.isArray(raw.order)?raw.order:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<TYPES.length),...TYPES.map((_,i)=>i)])];
+  const design={align:raw.align!==false,spread:raw.spread===true,merge:raw.merge===true,manual:raw.manual===true,order,rows:TYPES.map((_,i)=>typeof raw.rows?.[i]==='string'?raw.rows[i].slice(0,100):''),labels:raw.labels!==false,counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],i<5?7:0,0,30))),spacing:n(raw.spacing,9,9,12),tilt:n(raw.tilt,20,15,25),exposure:n(raw.exposure,1/3,.28,.35),width:n(raw.width,0,0,210),lanes:Array.isArray(raw.lanes)?raw.lanes.map(row=>Array.isArray(row)?row.map(g=>({type:Number(g.type),count:Number(g.count)})):[]):null};
   if(design.manual&&design.lanes)design.counts=TYPES.map((_,i)=>design.lanes.flat().filter(g=>g.type===i).reduce((sum,g)=>sum+(Number.isFinite(g.count)?g.count:0),0));
   return design;
 }

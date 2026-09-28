@@ -44,7 +44,10 @@ const {toLanes}=await import('../coin-cell-box/layout.js');
 const legacy={...DEFAULT,manual:true,merge:true,counts:[3,9,7,7,7],order:[1,0,2,3,4],rows:['3','7,2','7','7','7']};
 for(const spread of [false,true]){const old=layout({...legacy,spread}),lanes=toLanes({...legacy,spread}),updated=layout({...legacy,spread,lanes});assert.equal(updated.cells.length,old.cells.length);updated.cells.forEach((c,i)=>{assert.equal(c.type,old.cells[i].type);for(const key of ["x","y","z","floor","top"])assert(Math.abs(c[key]-old.cells[i][key])<1e-8);});assert.equal(updated.W,old.W);assert.equal(updated.D,old.D);}
 const explicit={...DEFAULT,manual:true,lanes:[[{type:1,count:7}],[{type:1,count:2},{type:0,count:3}],[{type:4,count:2},{type:2,count:3},{type:4,count:1}]]};
-const E=layout(explicit);assert.deepEqual(E.blocks.map(b=>[b.row,b.type,b.count]),[[0,1,7],[1,1,2],[1,0,3],[2,4,2],[2,2,3],[2,4,1]]);assert.equal(E.cells.length,18);assert.deepEqual(E.design.counts,[3,9,3,0,3]);assert.deepEqual(layout({...explicit,merge:true}).cells,E.cells);
+const E=layout(explicit);assert.deepEqual(E.blocks.map(b=>[b.row,b.type,b.count]),[[0,1,7],[1,1,2],[1,0,3],[2,4,2],[2,2,3],[2,4,1]]);assert.equal(E.cells.length,18);assert.deepEqual(E.design.counts,[3,9,3,0,3,0,0,0,0]);assert.deepEqual(layout({...explicit,merge:true}).cells,E.cells);
 assert.deepEqual(layout(JSON.parse(JSON.stringify(explicit))).cells,E.cells);
 for(const lanes of [[],[[]],[[{type:9,count:2}]],[[{type:1,count:0}]],[[{type:1,count:1.5}]],Array.from({length:13},()=>[{type:1,count:1}])])assert.throws(()=>layout({...DEFAULT,manual:true,lanes}));
 console.log('PASS explicit rows: legacy migration preserves cells, exact group order, totals, URL roundtrip and invalid input');
+
+assert.deepEqual(layout({}).design.counts.slice(5),[0,0,0,0]);
+assert.equal(layout(legacy).cells.length,33);

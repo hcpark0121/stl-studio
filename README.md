@@ -73,3 +73,7 @@ The optional `tests/ui.test.js` runs DOM input/event checks using jsdom (set `ST
 Input errors identify the battery type or width requirement, highlight the offending field and repeat the explanation next to the preview. Local DOM event checks cover total/row synchronization and recovery from invalid width and row text.
 
 Manual layout also supports slot-opening alignment (enabled by default), spacing expansion into spare row width (maximum 12mm pitch), and combining adjacent short groups without increasing box width. Labels remain per group and retention pads follow the resulting positions. Alignment preserves clearance by enlarging the shared end margin where necessary.
+
+## Optional coin-cell sizes
+
+The original five type indices remain stable. CR1616, CR1620, CR1216 and CR1220 are appended and default to zero, including when loading older links. Their quantity controls live in a collapsed Other coin cells section; manual row selectors group standard and optional sizes. Dimensions follow [Panasonic specifications](https://www.panasonic.com/global/energy/products/battery/coin_lithium_technologies.html). Small-cell physical handling remains untested; exported geometry, engraving and lid retention are checked.

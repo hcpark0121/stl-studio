@@ -17,6 +17,7 @@ const camera=new PerspectiveCamera(40,1,.1,3000);camera.up.set(0,0,1);camera.pos
 const base=new Vector3(0,0,0).project(camera),px=new Vector3(1,0,0).project(camera),py=new Vector3(0,1,0).project(camera);
 assert(px.x>base.x);assert(py.y>base.y);assert(sv.querySelectorAll('circle').length===2);
 assert($('#view-top')&&$('#view-angle'));
+assert.equal($('#counts').querySelectorAll('input').length,5);assert.equal($('#extra-counts').querySelectorAll('input').length,4);assert(!$('#other-cells').open);
 input('#lane-count-1-0','4');assert.equal(read().lanes[1][0].count,4);assert.equal(+$('#count-1').value,11);
 click('[data-row="1"][data-group="0"][data-action="group-front"]');assert.equal(read().lanes[1][1].type,1);
 click('[data-row="1"][data-action="row-up"]');assert.equal(read().lanes[0][0].type,0);
@@ -29,5 +30,7 @@ $('#lane-total').value='2';$('#lane-total').dispatchEvent(new w.Event('change'))
 input('#lane-count-0-0','');assert($('#body-download').disabled);assert.equal($('#lane-count-0-0').getAttribute('aria-invalid'),'true');
 input('#lane-count-0-0','3');assert(!$('#lane-count-0-0').hasAttribute('aria-invalid'));
 click('#manual');assert(!$('#count-1').disabled);click('#manual');assert($('#count-1').disabled);assert.equal(read().lanes.length,2);
+input('#row-settings select[data-row="0"][data-group="0"]','7');assert.equal(read().lanes[0][0].type,7);assert.equal(+$('#count-7').value,3);
+click('#reset');assert(!$('#other-cells').open);input('#count-8','2');assert.equal(read().counts[8],2);assert.equal(layout(read()).cells.filter(c=>c.type===8).length,2);
 console.log('PASS DOM: legacy migration, quantities, type selection, row/group order, additions, deletions, invalid recovery and mode switching');
 dom.window.close();
