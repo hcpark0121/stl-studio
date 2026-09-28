@@ -753,5 +753,110 @@ export const messages = {
     "en": "Spacing expands up to 12mm. Adjacent groups share a row only when they fit the existing width; each keeps its own label.",
     "ja": "間隔は最大12mm。隣り合うグループが既存の幅に収まる場合のみ同じ行にまとめ、各刻印を残します。",
     "zh": "间距最多增至12mm。相邻组能放入现有宽度时才合并，每组保留各自刻字。"
+  },
+  "줄별 배치 편집": {
+    "en": "Edit individual rows",
+    "ja": "行ごとの配置を編集",
+    "zh": "逐行编辑布局"
+  },
+  "줄마다 뒤(힌지) → 앞(자석) 순서로 종류와 수량을 추가하세요. 직접 지정한 줄은 자동으로 합치거나 나누지 않습니다.": {
+    "en": "Add battery groups from back (hinge) to front (magnets) in each row. Explicit rows are never merged or split automatically.",
+    "ja": "各行に奥（ヒンジ）から手前（磁石）の順で種類と個数を追加します。指定した行は自動で結合・分割されません。",
+    "zh": "每行按后侧（铰链）到前侧（磁铁）的顺序添加型号和数量。指定的行不会自动合并或拆分。"
+  },
+  "전체 줄 수": {
+    "en": "Number of rows",
+    "ja": "行数",
+    "zh": "行数"
+  },
+  "줄 수를 줄이면 마지막 줄부터 삭제됩니다. 종류별 총수량은 아래 배치에서 자동으로 계산합니다.": {
+    "en": "Reducing the row count removes rows from the end. Totals by battery type are calculated from the rows below.",
+    "ja": "行数を減らすと最後の行から削除します。種類別の総数は下の配置から自動計算します。",
+    "zh": "减少行数会从最后一行开始删除。各型号总数根据下方布局自动计算。"
+  },
+  "줄 추가": {
+    "en": "Add row",
+    "ja": "行を追加",
+    "zh": "添加行"
+  },
+  "줄 삭제": {
+    "en": "Delete row",
+    "ja": "行を削除",
+    "zh": "删除行"
+  },
+  "간격은 최대 12mm까지 넓힙니다. 짧은 묶음을 같은 줄에 넣으면 함께 배치됩니다.": {
+    "en": "Spacing expands up to 12mm. Put short groups in the same row to combine them.",
+    "ja": "間隔は最大12mmです。短いグループは同じ行に入れるとまとまります。",
+    "zh": "间距最多增至12mm。将较短组放入同一行即可合并。"
+  },
+  "{row}줄": {
+    "en": "Row {row}",
+    "ja": "{row}行目",
+    "zh": "第{row}行"
+  },
+  "뒤 · 힌지 → 앞 · 자석": {
+    "en": "Back · hinge → Front · magnets",
+    "ja": "奥・ヒンジ → 手前・磁石",
+    "zh": "后侧·铰链 → 前侧·磁铁"
+  },
+  "뒤 · 힌지": {
+    "en": "Back · hinge",
+    "ja": "奥・ヒンジ",
+    "zh": "后侧·铰链"
+  },
+  "앞 · 자석": {
+    "en": "Front · magnets",
+    "ja": "手前・磁石",
+    "zh": "前侧·磁铁"
+  },
+  "코인셀 종류": {
+    "en": "Battery type",
+    "ja": "電池の種類",
+    "zh": "电池型号"
+  },
+  "수량": {
+    "en": "Quantity",
+    "ja": "個数",
+    "zh": "数量"
+  },
+  "뒤로 이동": {
+    "en": "Move toward back",
+    "ja": "奥へ移動",
+    "zh": "向后移动"
+  },
+  "앞으로 이동": {
+    "en": "Move toward front",
+    "ja": "手前へ移動",
+    "zh": "向前移动"
+  },
+  "묶음 삭제": {
+    "en": "Delete group",
+    "ja": "グループを削除",
+    "zh": "删除组"
+  },
+  "종류·수량 추가": {
+    "en": "Add battery group",
+    "ja": "種類・個数を追加",
+    "zh": "添加型号和数量"
+  },
+  "줄 수는 1–12줄로 지정하세요.": {
+    "en": "Choose 1–12 rows.",
+    "ja": "行数は1–12行にしてください。",
+    "zh": "请选择1–12行。"
+  },
+  "{row}줄: 묶음을 1–8개 넣어 주세요.": {
+    "en": "Row {row}: add 1–8 groups.",
+    "ja": "{row}行目：グループを1–8個追加してください。",
+    "zh": "第{row}行：请添加1–8组。"
+  },
+  "{row}줄: 종류와 1–30개 사이의 수량을 지정하세요.": {
+    "en": "Row {row}: choose a type and a quantity from 1 to 30.",
+    "ja": "{row}行目：種類と1–30個の数量を指定してください。",
+    "zh": "第{row}行：请选择型号并输入1–30之间的数量。"
+  },
+  "{row}줄에 내부 폭 {needed}mm가 필요합니다. 폭 상한을 늘리거나 묶음을 다른 줄로 옮기세요.": {
+    "en": "Row {row} needs {needed}mm internal width. Increase the width limit or move groups to another row.",
+    "ja": "{row}行目には内幅{needed}mmが必要です。幅の上限を増やすか別の行に移してください。",
+    "zh": "第{row}行需要{needed}mm内宽。请增加宽度上限或将组移到其他行。"
   }
 };

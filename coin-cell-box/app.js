@@ -1,51 +1,70 @@
 import {t,language,applyTranslations} from '../shared/i18n.js';
 import * as THREE from 'three';
 import {OrbitControls} from '../vendor/three/OrbitControls.js';
-import {DEFAULT,TYPES,layout,normalize,parseRows,balanceRows} from './layout.js';
+import {DEFAULT,TYPES,layout,normalize,parseRows,balanceRows,toLanes} from './layout.js';
 const tQuantity=()=>t('{type} 개수',{type:''}).trim();
 const $=s=>document.querySelector(s),colors=['#ca9a62','#739c8a','#94b5a5','#aac7b0','#c6a4b5'];
 let generationTimer,statusValues={},statusKey="설정에 맞춰 3D 형상을 자동으로 만듭니다.";
 function status(key,values={}){statusKey=key;statusValues=values;$('#status').textContent=t(key,values);}
 let design=structuredClone(DEFAULT),L,built=null,revision=0,busy=false,scene,camera,renderer,controls,root,lidPivot;
 try{if(location.hash.startsWith('#d='))design=normalize(JSON.parse(decodeURIComponent(location.hash.slice(3))));}catch{}
+if(design.manual&&!design.lanes){try{design={...design,lanes:toLanes(design)};}catch{}}
 $('#counts').innerHTML=TYPES.map((t,i)=>`<label class="field"><span><span class="swatch" style="background:${colors[i]}"></span>${t.id}<small>Ø${t.d} × ${t.t}mm</small></span><input type="number" min="0" max="30" step="1" id="count-${i}" aria-label="${t.id} ${tQuantity()}"></label>`).join('');
+function commitLanes(){design=normalize({...design,manual:true,merge:false});sync();invalidate();showPlan();scheduleGeneration();}
 function renderRows(){
  $('#manual').checked=design.manual;$('#manual-settings').hidden=!design.manual;
- $('#row-settings').innerHTML=design.order.map((i,k)=>`<div class="row-setting"><strong>${TYPES[i].id}</strong><div><button class="secondary" data-move="${i}" data-dir="-1" aria-label="${t('위로 이동')} ${TYPES[i].id}" ${k===0?'disabled':''}>↑</button><button class="secondary" data-move="${i}" data-dir="1" aria-label="${t('아래로 이동')} ${TYPES[i].id}" ${k===4?'disabled':''}>↓</button></div><label>${t('줄별 개수')}<input id="rows-${i}" type="text" inputmode="text" placeholder="${design.counts[i]}" aria-label="${TYPES[i].id} ${t('줄별 개수')}"></label></div>`).join('');
- TYPES.forEach((_,i)=>{$('#rows-'+i).value=design.rows[i];$('#rows-'+i).addEventListener('input',changed);});
- for(const button of document.querySelectorAll('[data-move]'))button.onclick=()=>{const at=design.order.indexOf(+button.dataset.move),to=at+Number(button.dataset.dir);[design.order[at],design.order[to]]=[design.order[to],design.order[at]];renderRows();changed();};
+ TYPES.forEach((_,i)=>$('#count-'+i).disabled=design.manual);
+ $('#lane-total').value=design.lanes?.length||1;
+ const rows=design.lanes||[];
+ $('#row-settings').innerHTML=rows.map((row,r)=>`<section class="lane-card" id="lane-${r}"><div class="toolbar"><strong>${t('{row}줄',{row:r+1})}</strong><button class="secondary" data-row="${r}" data-action="row-up" ${r===0?'disabled':''} aria-label="${t('위로 이동')}">↑</button><button class="secondary" data-row="${r}" data-action="row-down" ${r===rows.length-1?'disabled':''} aria-label="${t('아래로 이동')}">↓</button><button class="secondary" data-row="${r}" data-action="row-delete">${t('줄 삭제')}</button></div><p class="help">${t('뒤 · 힌지 → 앞 · 자석')}</p>${row.map((g,k)=>`<div class="lane-group"><select data-row="${r}" data-group="${k}" aria-label="${t('코인셀 종류')}">${TYPES.map((type,i)=>`<option value="${i}" ${i===g.type?'selected':''}>${type.id}</option>`).join('')}</select><input id="lane-count-${r}-${k}" type="number" min="1" max="30" step="1" value="${g.count}" data-row="${r}" data-group="${k}" aria-label="${t('수량')}"><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-back" ${k===0?'disabled':''} aria-label="${t('뒤로 이동')}">←</button><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-front" ${k===row.length-1?'disabled':''} aria-label="${t('앞으로 이동')}">→</button><button class="secondary" data-row="${r}" data-group="${k}" data-action="group-delete" aria-label="${t('묶음 삭제')}">×</button></div>`).join('')}<button class="secondary" data-row="${r}" data-action="group-add" ${row.length>=8?'disabled':''}>${t('종류·수량 추가')}</button></section>`).join('');
+ $('#add-lane').disabled=rows.length>=12;
 }
-function sync(){renderRows();for(const key of ['align','spread','merge'])$('#'+key).checked=design[key];$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
+function sync(){renderRows();for(const key of ['align','spread'])$('#'+key).checked=design[key];$('#labels').checked=design.labels;TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);for(const k of ['spacing','tilt','width'])$('#'+k).value=design[k];$('#exposure').value=+(design.exposure*100).toFixed(2);}
+$('#row-settings').onclick=event=>{
+ const button=event.target.closest('button[data-action]');if(!button)return;const r=+button.dataset.row,k=+button.dataset.group,rows=design.lanes,row=rows[r];
+ switch(button.dataset.action){
+ case 'row-up':[rows[r-1],rows[r]]=[rows[r],rows[r-1]];break;
+ case 'row-down':[rows[r+1],rows[r]]=[rows[r],rows[r+1]];break;
+ case 'row-delete':rows.splice(r,1);break;
+ case 'group-back':[row[k-1],row[k]]=[row[k],row[k-1]];break;
+ case 'group-front':[row[k+1],row[k]]=[row[k],row[k+1]];break;
+ case 'group-delete':row.splice(k,1);break;
+ case 'group-add':row.push({type:1,count:1});break;
+ }
+ commitLanes();
+};
+$('#row-settings').oninput=event=>{
+ const el=event.target;if(!el.matches('input[data-group],select[data-group]'))return;
+ const g=design.lanes[+el.dataset.row][+el.dataset.group];g[el.tagName==='SELECT'?'type':'count']=el.value===''?0:Number(el.value);
+ design=normalize(design);TYPES.forEach((_,i)=>$('#count-'+i).value=design.counts[i]);invalidate();showPlan();scheduleGeneration();
+};
+$('#add-lane').onclick=()=>{if(!design.lanes)design.lanes=[];design.lanes.push([{type:1,count:1}]);commitLanes();};
+$('#lane-total').onchange=()=>{const el=$('#lane-total');if(!el.validity.valid||!el.value)return;const n=Number(el.value);design.lanes=design.lanes.slice(0,n);while(design.lanes.length<n)design.lanes.push([{type:1,count:1}]);commitLanes();};
 function invalidate(){revision++;built=null;for(const id of ['body-download','lid-download','guide-download'])$('#'+id).disabled=true;status('설정에 맞춰 3D 형상을 자동으로 만듭니다.');$('#viewport').hidden=false;if(root)root.visible=false;$('#layout').hidden=!$('#show-plan').checked;}
 function showPlan(){
  try{document.querySelectorAll('[aria-invalid]').forEach(el=>el.removeAttribute('aria-invalid'));L=layout(design);$('#metrics').innerHTML=`<span><strong>${L.cells.length}</strong>${t("개 수납")}</span><span><strong>${(L.W+6.9).toFixed(1)} × ${(L.D+3.1).toFixed(1)}</strong>${t("전체 가로 × 세로 mm")}</span><span><strong>${L.outerZ.toFixed(1)}</strong>${t("높이 mm")}</span>`;
- const svg=$('#layout');svg.setAttribute('viewBox',`-8 -5 ${L.W+16} ${L.D+10}`);
- svg.innerHTML=`<rect x="0" y="0" width="${L.W}" height="${L.D}" rx="2" fill="#edf0e7" stroke="#193b37" stroke-width=".5"/>`+L.blocks.map(b=>`<g><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="1" fill="${colors[b.type]}" fill-opacity=".22" stroke="${colors[b.type]}" stroke-width=".4"/><text x="${b.x+2}" y="${b.y+3}" font-size="2.4" fill="#193b37">${TYPES[b.type].id} · ${b.count}</text></g>`).join('')+L.cells.map(c=>`<rect x="${c.x-TYPES[c.type].t/2}" y="${c.y-TYPES[c.type].d/2}" width="${TYPES[c.type].t}" height="${TYPES[c.type].d}" rx=".5" fill="${colors[c.type]}"/>`).join('');
+ const svg=$('#layout');svg.setAttribute('viewBox',`-8 -12 ${L.W+16} ${L.D+17}`);
+ svg.innerHTML=`<text x="0" y="-5" font-size="3" fill="#193b37">${t('뒤 · 힌지')}</text><text x="${L.W}" y="-5" text-anchor="end" font-size="3" fill="#193b37">${t('앞 · 자석')}</text><rect x="0" y="0" width="${L.W}" height="${L.D}" rx="2" fill="#edf0e7" stroke="#193b37" stroke-width=".5"/>`+L.blocks.map(b=>`<g><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="1" fill="${colors[b.type]}" fill-opacity=".22" stroke="${colors[b.type]}" stroke-width=".4"/><text x="${b.x+2}" y="${b.y+3}" font-size="2.4" fill="#193b37">${TYPES[b.type].id} · ${b.count}</text></g>`).join('')+L.cells.map(c=>`<rect x="${c.x-TYPES[c.type].t/2}" y="${c.y-TYPES[c.type].d/2}" width="${TYPES[c.type].t}" height="${TYPES[c.type].d}" rx=".5" fill="${colors[c.type]}"/>`).join('');
  $('#section').textContent=t('기울기 {tilt}° · 중심 간격 {spacing}mm · 셀 노출 약 {exposure}% · 뚜껑 받침까지 0.5mm',{tilt:design.tilt,spacing:design.spread&&design.manual?`${Math.min(...L.blocks.map(b=>b.pitch)).toFixed(1)}–${Math.max(...L.blocks.map(b=>b.pitch)).toFixed(1)}`:design.spacing,exposure:(design.exposure*100).toFixed(0)});
  $('#pauses').innerHTML=[['뚜껑',L.pauses[0]],['본체',L.pauses[1]]].map(([n,z])=>`<tr><td>${t(n)}</td><td>${(z-.2).toFixed(1)}mm</td><td>${t("{layer}층 ({z}mm) 출력 전",{layer:Math.round(z/.2),z:z.toFixed(1)})}</td></tr>`).join('');
  history.replaceState(null,'','#d='+encodeURIComponent(JSON.stringify(design)));
  }catch(e){L=null;status(e.message,e.values);if(e.field)$('#'+e.field)?.setAttribute('aria-invalid','true');$('#layout').innerHTML='';$('#metrics').textContent=t(e.message,e.values);$('#pauses').innerHTML='';}
 }
-function changed(event){
- const input=event?.target;
- if($('#manual').checked&&input?.id.startsWith('rows-')){
-  const values=parseRows(input.value);if(values&&values.reduce((s,n)=>s+n,0)<=30)$('#count-'+input.id.slice(5)).value=values.reduce((s,n)=>s+n,0);
- }
- if($('#manual').checked&&input?.id.startsWith('count-')&&input.value!==''&&input.validity.valid){
-  const rows=$('#rows-'+input.id.slice(6));if(rows.value.trim())rows.value=balanceRows(Number(input.value),rows.value);
- }
- const invalid=[...document.querySelectorAll('input[type=number]')].find(el=>el.value===''||!el.validity.valid);
- if(invalid){invalidate();L=null;invalid.setAttribute('aria-invalid','true');const name=invalid.getAttribute('aria-label')||invalid.closest('label')?.firstChild?.textContent?.trim()||invalid.id;const values={field:name,min:invalid.min,max:invalid.max};status('{field}: {min}–{max} 범위의 값을 입력하세요.',values);$('#metrics').textContent=t(statusKey,values);return;}
- design=normalize({align:$('#align').checked,spread:$('#spread').checked,merge:$('#merge').checked,manual:$('#manual').checked,order:design.order,rows:TYPES.map((_,i)=>$('#rows-'+i).value),labels:$('#labels').checked,counts:TYPES.map((_,i)=>+$('#count-'+i).value),spacing:+$('#spacing').value,tilt:+$('#tilt').value,width:+$('#width').value,exposure:+$('#exposure').value/100});
- TYPES.forEach((_,i)=>$('#rows-'+i).placeholder=design.counts[i]);invalidate();showPlan();scheduleGeneration();
+function changed(){
+ const invalid=[...document.querySelectorAll('input[type=number]')].filter(el=>!el.disabled&&el.id!=='lane-total'&&!el.closest('#row-settings')).find(el=>el.value===''||!el.validity.valid);
+ if(invalid){invalidate();L=null;invalid.setAttribute('aria-invalid','true');const values={field:invalid.getAttribute('aria-label')||invalid.id,min:invalid.min,max:invalid.max};status('{field}: {min}–{max} 범위의 값을 입력하세요.',values);$('#metrics').textContent=t(statusKey,values);return;}
+ design=normalize({...design,align:$('#align').checked,spread:$('#spread').checked,manual:$('#manual').checked,labels:$('#labels').checked,counts:TYPES.map((_,i)=>+$('#count-'+i).value),spacing:+$('#spacing').value,tilt:+$('#tilt').value,width:+$('#width').value,exposure:+$('#exposure').value/100});
+ invalidate();showPlan();scheduleGeneration();
 }
-for(const el of document.querySelectorAll('input[type=number]'))el.addEventListener('input',changed);
-$('#labels').addEventListener('change',changed);
-for(const key of ['align','spread','merge'])$('#'+key).addEventListener('change',changed);
-$('#manual').onchange=()=>{$('#manual-settings').hidden=!$('#manual').checked;changed();};
+for(const el of document.querySelectorAll('#counts input,input#spacing,input#tilt,input#width,input#exposure'))el.addEventListener('input',changed);
+for(const key of ['labels','align','spread'])$('#'+key).addEventListener('change',changed);
+$('#manual').onchange=()=>{
+ if($('#manual').checked&&!design.lanes){try{design.lanes=toLanes(design);}catch{design.lanes=[[{type:1,count:1}]];}}
+ design=normalize({...design,manual:$('#manual').checked});if(design.manual)$('#show-plan').checked=true;sync();changed();
+};
 $('#reset').onclick=()=>{design=structuredClone(DEFAULT);invalidate();sync();showPlan();scheduleGeneration();};
-$('#example').onclick=()=>{design={...design,counts:[10,5,5,5,5]};invalidate();sync();showPlan();scheduleGeneration();};
-$('#two-row-example').onclick=()=>{design={...design,manual:true,counts:[6,10,6,6,4],order:[1,0,2,3,4],rows:['','5,5','','',''],width:0};invalidate();sync();showPlan();scheduleGeneration();};
+$('#example').onclick=()=>{design={...design,manual:false,lanes:null,counts:[10,5,5,5,5]};invalidate();sync();showPlan();scheduleGeneration();};
+$('#two-row-example').onclick=()=>{design={...design,manual:true,lanes:[[{type:1,count:6}],[{type:1,count:6}],[{type:0,count:6}],[{type:2,count:6}],[{type:3,count:6}],[{type:4,count:6}]],width:0};commitLanes();};
 $('#share').onclick=async()=>{try{await navigator.clipboard.writeText(location.href);status('현재 설정 링크를 복사했습니다.');}catch{status('주소창의 주소를 복사하면 같은 설정을 공유할 수 있습니다.');}};
 function init3D(){
  if(renderer)return;
@@ -78,4 +97,4 @@ function download(data,name,type='application/octet-stream'){const url=URL.creat
 $('#body-download').onclick=()=>built&&download(built.body,'coincell-body.stl');$('#lid-download').onclick=()=>built&&download(built.lid,'coincell-lid-print.stl');
 $('#guide-download').onclick=()=>{if(!built)return;const l=built.layout;download(JSON.stringify({design:l.design,units:'mm',hardware:{magnet:'5 x 2mm, 4 pieces',pin:'1.75mm filament'},layer_height:.2,pause_before_z:{lid:l.pauses[0],body:l.pauses[1]},pause_completed_z:{lid:+(l.pauses[0]-.2).toFixed(2),body:+(l.pauses[1]-.2).toFixed(2)},language,note:t('STL에는 정지가 없습니다. 자석 구멍이 열린 마지막 층 다음에 정지를 설정하세요. 이 맞춤 형상의 실물 끼움과 흔들기 유지력은 미검증입니다.')},null,2),`coincell-print-guide-${language}.json`,'application/json');};
 window.addEventListener('languagechange',()=>{renderRows();showPlan();status(statusKey,statusValues);TYPES.forEach((cell,i)=>$('#count-'+i).setAttribute('aria-label',t('{type} 개수',{type:cell.id})));});
-sync();showPlan();applyTranslations();scheduleGeneration();
+if(design.manual)$('#show-plan').checked=true;sync();showPlan();applyTranslations();scheduleGeneration();

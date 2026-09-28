@@ -59,8 +59,13 @@ Allowed settings: 15–25° tilt, 9–12mm centre spacing, 28–35% exposure. Sh
 
 Engraving now uses curved DejaVu Sans Bold outlines (3.2mm text height, 0.6mm recess), fitted within each group’s leading strip. Font notices are included in vendor/label-font.
 
-## Manual rows
-Under Order / quantities per row, enable manual layout to reorder battery types with up/down buttons. Enter comma-separated quantities per row (for example 5,5 for 10 cells); editing row quantities updates the total automatically, and changing the total redistributes evenly across the current number of rows. Blank means a single row. Manual rows are stacked in the chosen order without automatic repacking. The CR2032 two-row example uses counts 6/10/6/6/4 and places CR2032 first. These settings are preserved in shared URLs and print guides.
+## Explicit row editing
+
+Manual layout is a list of rows. Each row contains ordered battery groups such as CR2032 × 2 then CR2450 × 3, from the hinge side (back) toward the magnets (front). Users choose 1–12 rows and up to 8 groups per row, add/delete groups, change type and quantity, and reorder both rows and their groups. Printable bed bounds still apply. Totals are derived from rows; explicit rows are not automatically split or merged. Alignment and spacing expansion remain available.
+
+Old manual links are converted to explicit rows while preserving their cell positions, including mixed rows previously formed by merging. The new `lanes` array is included in shared URLs and print guides. Automatic packing remains available when manual mode is off.
+
+The optional `tests/ui.test.js` runs DOM input/event checks using jsdom (set `STL_STUDIO_JSDOM` to its installed entry point). Geometry/download checks do not require that dependency. Current coverage includes 28 exported-STL configurations and old-link migration.
 
 ## Cache-safe deployment
 `npm run build` creates `_site/` and gives HTML entry scripts, stylesheets, module imports and workers the same content-derived release version. Pages deploys this build so refreshed HTML cannot silently reuse an older editor module. An already-open page still needs a reload to receive changes.

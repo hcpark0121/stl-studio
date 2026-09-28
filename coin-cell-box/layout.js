@@ -2,12 +2,14 @@ export const TYPES = [
   {id:'CR2450',d:24.5,t:5}, {id:'CR2032',d:20,t:3.2},
   {id:'CR2025',d:20,t:2.5}, {id:'CR2016',d:20,t:1.6}, {id:'CR1632',d:16,t:3.2}
 ];
-export const DEFAULT = {counts:[7,7,7,7,7], spacing:9, tilt:20, exposure:0.3333333333, width:0, labels:true, align:true, spread:false, merge:false, manual:false, order:[0,1,2,3,4], rows:['','','','','']};
+export const DEFAULT = {counts:[7,7,7,7,7], spacing:9, tilt:20, exposure:0.3333333333, width:0, labels:true, align:true, spread:false, merge:false, manual:false, order:[0,1,2,3,4], rows:['','','','',''],lanes:null};
 const rad = a=>a*Math.PI/180;
 export function normalize(raw={}) {
   const n=(x,d,a,b)=>Number.isFinite(+x)?Math.min(b,Math.max(a,+x)):d;
   const order=[...new Set([...(Array.isArray(raw.order)?raw.order:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<TYPES.length),0,1,2,3,4])];
-  return {align:raw.align!==false,spread:raw.spread===true,merge:raw.merge===true,manual:raw.manual===true,order,rows:TYPES.map((_,i)=>typeof raw.rows?.[i]==='string'?raw.rows[i].slice(0,100):''),labels:raw.labels!==false,counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],7,0,30))),spacing:n(raw.spacing,9,9,12),tilt:n(raw.tilt,20,15,25),exposure:n(raw.exposure,1/3,.28,.35),width:n(raw.width,0,0,210)};
+  const design={align:raw.align!==false,spread:raw.spread===true,merge:raw.merge===true,manual:raw.manual===true,order,rows:TYPES.map((_,i)=>typeof raw.rows?.[i]==='string'?raw.rows[i].slice(0,100):''),labels:raw.labels!==false,counts:TYPES.map((_,i)=>Math.round(n(raw.counts?.[i],7,0,30))),spacing:n(raw.spacing,9,9,12),tilt:n(raw.tilt,20,15,25),exposure:n(raw.exposure,1/3,.28,.35),width:n(raw.width,0,0,210),lanes:Array.isArray(raw.lanes)?raw.lanes.map(row=>Array.isArray(row)?row.map(g=>({type:Number(g.type),count:Number(g.count)})):[]):null};
+  if(design.manual&&design.lanes)design.counts=TYPES.map((_,i)=>design.lanes.flat().filter(g=>g.type===i).reduce((sum,g)=>sum+(Number.isFinite(g.count)?g.count:0),0));
+  return design;
 }
 function pack(design,width) {
   const a=rad(design.tilt),pitch=design.spacing, shelves=[],blocks=[];
@@ -73,9 +75,40 @@ function manualPack(design){
  }
  return {w,d:y-1.26,blocks};
 }
+// Explicit rows never merge or reorder themselves. Each group owns its label and lid pad.
+function lanePack(design){
+ if(!design.lanes.length||design.lanes.length>12)throw Error('줄 수는 1–12줄로 지정하세요.');
+ const a=rad(design.tilt),delta=t=>(t.d*Math.cos(a)+t.t*Math.sin(a))*(.5-design.exposure)*Math.tan(a);
+ const endFor=t=>Math.max(design.spacing-1.26,t.d*Math.sin(a)+(t.t+.6)/Math.cos(a)+.8);
+ const common=Math.max(...TYPES.filter((_,i)=>design.counts[i]>0).map(t=>endFor(t)+2*Math.abs(delta(t))));
+ const shelves=design.lanes.map((row,r)=>{
+  if(!row.length||row.length>8)throw inputError('{row}줄: 묶음을 1–8개 넣어 주세요.',{row:r+1},'lane-'+r);
+  const items=row.map((g,k)=>{
+   if(!Number.isInteger(g.type)||!TYPES[g.type]||!Number.isInteger(g.count)||g.count<1||g.count>30)throw inputError('{row}줄: 종류와 1–30개 사이의 수량을 지정하세요.',{row:r+1},`lane-count-${r}-${k}`);
+   const t=TYPES[g.type],end=design.align?common:endFor(t);
+   return {type:g.type,count:g.count,w:5+end+(g.count-1)*design.spacing,h:t.d+1,end,shiftX:design.align?-delta(t):0,pitch:design.spacing,row:r};
+  });
+  const used=items.reduce((n,b)=>n+b.w,0)+(items.length-1)*1.26;
+  if(design.width&&used>design.width)throw inputError('{row}줄에 내부 폭 {needed}mm가 필요합니다. 폭 상한을 늘리거나 묶음을 다른 줄로 옮기세요.',{row:r+1,needed:Math.ceil(used)},'width');
+  return {items,used,h:Math.max(...items.map(b=>b.h))};
+ });
+ const w=Math.max(...shelves.map(s=>s.used)),blocks=[];let y=0;
+ for(const shelf of shelves){
+  const gaps=shelf.items.reduce((n,b)=>n+b.count-1,0),extra=design.spread&&gaps?Math.min(12-design.spacing,(w-shelf.used)/gaps):0;let x=0;
+  for(const b of shelf.items){b.pitch+=extra;b.w+=(b.count-1)*extra;b.x=x;b.y=y+(shelf.h-b.h)/2;blocks.push(b);x+=b.w+1.26;}
+  y+=shelf.h+1.26;
+ }
+ return {w,d:y-1.26,blocks};
+}
+export function toLanes(raw){
+ const design=normalize(raw);if(design.lanes)return structuredClone(design.lanes);
+ const L=layout(design),groups=new Map();
+ for(const b of L.blocks){const key=(b.y+b.h/2).toFixed(6);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(b);}
+ return [...groups.entries()].sort((a,b)=>Number(a[0])-Number(b[0])).map(([,row])=>row.sort((a,b)=>a.x-b.x).map(b=>({type:b.type,count:b.count})));
+}
 export function layout(raw) {
   const design=normalize(raw);if(!design.counts.some(Boolean))throw Error('코인셀을 최소 1개 선택하세요.');
-  let best=design.manual?manualPack(design):null;
+  let best=design.manual?(design.lanes?lanePack(design):manualPack(design)):null;
   const candidates=design.width?[Math.max(design.width,24)]:Array.from({length:177},(_,i)=>24+i);
   for(const width of design.manual?[]:candidates) {const p=pack(design,width);if(p&&(!best||p.score<best.score))best=p;}
   if(!best)throw Error('지정한 내부 폭으로는 셀을 배치할 수 없습니다.');

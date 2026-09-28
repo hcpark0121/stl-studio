@@ -1,0 +1,25 @@
+// Optional DOM interaction test: point STL_STUDIO_JSDOM at an installed jsdom module.
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {DEFAULT,TYPES,layout,normalize,parseRows,balanceRows,toLanes} from '../coin-cell-box/layout.js';
+const {JSDOM}=await import(process.env.STL_STUDIO_JSDOM||'jsdom');
+const legacy={...DEFAULT,manual:true,merge:true,counts:[3,9,7,7,7],order:[1,0,2,3,4],rows:['3','7,2','7','7','7']};
+const dom=new JSDOM(fs.readFileSync(new URL('../coin-cell-box/index.html',import.meta.url),'utf8'),{url:'https://example.test/?lang=ko#d='+encodeURIComponent(JSON.stringify(legacy)),runScripts:'outside-only'}),w=dom.window;
+Object.assign(w,{DEFAULT,TYPES,layout,normalize,parseRows,balanceRows,toLanes,structuredClone,t:(s,v={})=>s.replace(/\{(\w+)\}/g,(_,k)=>v[k]??k),language:'ko',applyTranslations:()=>{},Worker:class{postMessage(){}},setTimeout:()=>1,clearTimeout:()=>{}});
+w.eval(fs.readFileSync(new URL('../coin-cell-box/app.js',import.meta.url),'utf8').replace(/^import .*;$/gm,'').replaceAll('import.meta.url',"'https://example.test/coin-cell-box/app.js'"));
+const $=s=>w.document.querySelector(s),read=()=>JSON.parse(decodeURIComponent(w.location.hash.slice(3))),click=s=>$(s).click(),input=(s,value)=>{const e=$(s);e.value=value;e.dispatchEvent(new w.Event('input',{bubbles:true}));};
+assert.deepEqual(read().lanes,toLanes(legacy));assert($('#count-1').disabled);assert($('#show-plan').checked);
+input('#lane-count-1-0','4');assert.equal(read().lanes[1][0].count,4);assert.equal(+$('#count-1').value,11);
+click('[data-row="1"][data-group="0"][data-action="group-front"]');assert.equal(read().lanes[1][1].type,1);
+click('[data-row="1"][data-action="row-up"]');assert.equal(read().lanes[0][0].type,0);
+click('[data-row="0"][data-action="group-add"]');assert.equal(read().lanes[0].length,3);
+input('#row-settings select[data-row="0"][data-group="2"]','4');assert.equal(read().lanes[0][2].type,4);
+click('[data-row="0"][data-group="2"][data-action="group-delete"]');assert.equal(read().lanes[0].length,2);
+const before=read().lanes.length;click('#add-lane');assert.equal(read().lanes.length,before+1);
+click(`[data-row="${before}"][data-action="row-delete"]`);assert.equal(read().lanes.length,before);
+$('#lane-total').value='2';$('#lane-total').dispatchEvent(new w.Event('change'));assert.equal(read().lanes.length,2);
+input('#lane-count-0-0','');assert($('#body-download').disabled);assert.equal($('#lane-count-0-0').getAttribute('aria-invalid'),'true');
+input('#lane-count-0-0','3');assert(!$('#lane-count-0-0').hasAttribute('aria-invalid'));
+click('#manual');assert(!$('#count-1').disabled);click('#manual');assert($('#count-1').disabled);assert.equal(read().lanes.length,2);
+console.log('PASS DOM: legacy migration, quantities, type selection, row/group order, additions, deletions, invalid recovery and mode switching');
+dom.window.close();
