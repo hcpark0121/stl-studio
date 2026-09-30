@@ -70,9 +70,13 @@ $('#share').onclick=async()=>{try{await navigator.clipboard.writeText(location.h
 function init3D(){
  if(renderer)return;
  const el=$('#viewport');renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));el.append(renderer.domElement);
- scene=new THREE.Scene();scene.background=new THREE.Color('#e8ece5');camera=new THREE.PerspectiveCamera(40,1,.1,3000);camera.up.set(0,0,1);
+ scene=new THREE.Scene();scene.background=new THREE.Color('#f1f4f6');camera=new THREE.PerspectiveCamera(40,1,.1,3000);camera.up.set(0,0,1);
  controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
- scene.add(new THREE.HemisphereLight(0xffffff,0x65776a,2));const light=new THREE.DirectionalLight(0xffffff,3);light.position.set(-90,-130,250);scene.add(light);
+ // Neutral studio lighting keeps cavities readable without metallic glare.
+ renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+ scene.add(new THREE.HemisphereLight(0xffffff,0x8b99a6,1.7));
+ const light=new THREE.DirectionalLight(0xffffff,2.4);light.position.set(-90,-130,250);scene.add(light);
+ const fill=new THREE.DirectionalLight(0xddeeff,.8);fill.position.set(180,120,100);scene.add(fill);
  new ResizeObserver(()=>{const w=el.clientWidth,h=el.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(el);
  renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
 }
@@ -80,7 +84,11 @@ function display(data){
  const firstView=!root;init3D();if(root){root.traverse(o=>{o.geometry?.dispose();if(o.material)o.material.dispose();});scene.remove(root);}
  root=new THREE.Group();scene.add(root);lidPivot=new THREE.Group();lidPivot.position.fromArray(data.layout.axis);root.add(lidPivot);
  for(const name of ['body','lid','coins']){const m=data.meshes[name],p=new Float32Array(m.vertices.length/m.stride*3);for(let i=0;i<p.length/3;i++)p.set(m.vertices.subarray(i*m.stride,i*m.stride+3),i*3);
- const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setIndex(new THREE.BufferAttribute(m.indices,1));g.computeVertexNormals();const mesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:name==='coins'?0x99a3a4:name==='lid'?0x829e8b:0xd0b08a,roughness:.7,metalness:name==='coins'?.7:0}));mesh.name=name;if(name==='coins')mesh.visible=$('#show-coins').checked;if(name==='lid'){mesh.position.fromArray(data.layout.axis.map(v=>-v));lidPivot.add(mesh);}else root.add(mesh);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setIndex(new THREE.BufferAttribute(m.indices,1));// Shared CAD vertices must not smooth normals across slot corners and flat faces.
+ const surface=g.toNonIndexed();surface.computeVertexNormals();g.dispose();
+ const mesh=new THREE.Mesh(surface,new THREE.MeshStandardMaterial({color:name==='coins'?0xc3cbd1:0x8bcddd,roughness:name==='coins'?.48:.82,metalness:name==='coins'?.22:0}));
+ if(name!=='coins'){const edges=new THREE.LineSegments(new THREE.EdgesGeometry(surface,35),new THREE.LineBasicMaterial({color:0x35576a,transparent:true,opacity:.16,depthWrite:false}));mesh.add(edges);}
+ mesh.name=name;if(name==='coins')mesh.visible=$('#show-coins').checked;if(name==='lid'){mesh.position.fromArray(data.layout.axis.map(v=>-v));lidPivot.add(mesh);}else root.add(mesh);}
  const s=Math.max(data.layout.W,data.layout.D);if(firstView){controls.target.set(data.layout.W/2,data.layout.D/2,10);camera.position.set(data.layout.W/2+s,data.layout.D/2-s*1.6,s*1.5);controls.update();}lidPivot.rotation.y=-Number($('#opening').value)*Math.PI/180;
 }
 $('#view-top').onclick=()=>{if(!camera||!built)return;const l=built.layout,s=Math.max(l.W,l.D);controls.target.set(l.W/2,l.D/2,0);camera.position.set(l.W/2,l.D/2-.001,s*2);controls.update();};
